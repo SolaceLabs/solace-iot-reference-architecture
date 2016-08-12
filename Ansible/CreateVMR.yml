@@ -7,7 +7,7 @@ tasks:
       wait:                   yes
       wait_timeout:      300
       assign_public_ip: yes
-	  key_name:         {{ lookup('env', 'AWS_KEY_NAME') }}
+      key_name:         {{ lookup('env', 'AWS_KEY_NAME') }}
       instance_type:    {{ lookup('env', 'AWS_INSTANCE_TYPE') }}
       instance_tags:
          Name:              {{ lookup('env', 'AWS_INSTANCE_NAME') }}
