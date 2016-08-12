@@ -3,16 +3,16 @@
 tasks:
 - name: Create a new VMR instance
    ec2:
-      image:                ami-1fe82c72
-      wait:                   yes
-      wait_timeout:      300
+      image:            ami-7ff43012
+      wait:             yes
+      wait_timeout:     300
       assign_public_ip: yes
-      key_name:         {{ lookup('env', 'AWS_KEY_NAME') }}
-      instance_type:    {{ lookup('env', 'AWS_INSTANCE_TYPE') }}
+      key_name:        {{ lookup('env', 'AWS_KEY_NAME') }}
+      instance_type:   {{ lookup('env', 'AWS_INSTANCE_TYPE') }}
       instance_tags:
-         Name:              {{ lookup('env', 'AWS_INSTANCE_NAME') }}
-      region:                {{ lookup('env', 'AWS_REGION') }}
+         Name:         {{ lookup('env', 'AWS_INSTANCE_NAME') }}
+      region:          {{ lookup('env', 'AWS_REGION') }}
       aws_access_key:  {{ lookup('env', 'AWS_ACCESS_KEY_ID') }}
-      aws_secret_key:   {{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}
-      vpc_subnet_id:     {{ lookup('env', 'AWS_SUBNET_ID') }}
-      group_id:             {{ lookup('env', 'AWS_GROUP_ID') }}"
+      aws_secret_key:  {{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}
+      vpc_subnet_id:   {{ lookup('env', 'AWS_SUBNET_ID') }}
+      group_id:        {{ lookup('env', 'AWS_GROUP_ID') }}"
