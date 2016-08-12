@@ -2,11 +2,14 @@
 
 # Credentials and locality
 # Replace XXX with your credentials and local info 
-export AWS_ACCESS_KEY_ID=XXX
-export AWS_SECRET_ACCESS_KEY=XXX
-export AWS_SUBNET_ID=XXX<From previous screen selection>
-export AWS_GROUP_ID=XXX<Your security Policy>
-export AWS_REGION=XXX<[us-east-1|us-west-1|ap-southeast-1|eu-central-1|eu-west-1|...>
+export AWS_ACCESS_KEY_ID=XXX <Your AWS Access key>
+export AWS_SECRET_ACCESS_KEY=XXX <Your AWS Key Secret>
+export AWS_SUBNET_ID=XXX <From previous screen selection>
+export AWS_GROUP_ID=XXX <Your security Policy>
+export AWS_REGION=XXX <[us-east-1|us-west-1|ap-southeast-1|eu-central-1|eu-west-1|...]>
+export AWS_KEY_NAME=XXX <a TLS PEM you use to access AWS instances>
+export AWS_INSTANCE_TYPE=t2.medium <t2.medium will be minimum requirement, its not free>
+export AWS_INSTANCE_NAME="MyVMR" <What ever name you want to see in AWS console>
 
 # Host Setup
 sudo apt-get update
@@ -20,7 +23,7 @@ sudo pip install boto3
 
 
 # Download tests
-ansible localhost -m git -a "repo=https://github.com/KenBarr/mqtt3.1.1_1.1.0_test dest=test_env"
+ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=test_env"
 
 # Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
 wget http://sftp.solacesystems.com/download/SDKPERF_JAVA?mkt_tok=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D
