@@ -21,21 +21,25 @@ sudo apt-get -y install unzip
 sudo pip install boto
 sudo pip install boto3
 
+echo "localhost" > /etc/ansible/hosts
 
 # Download tests
-ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=test_env"
+ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
 
 # Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
+mkdir /home/ubuntu/test_env/Sdkperf
+cd /home/ubuntu/test_env/Sdkperf
 wget http://sftp.solacesystems.com/download/SDKPERF_JAVA?mkt_tok=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D
-
-mv SDKPERF_JAVA\?mkt_tok\=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D  test_env\Sdkperf\sdkperf_java.zip
-
-cd ~/test_env/Sdkperf
+mv SDKPERF_JAVA\?mkt_tok\=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D  ./sdkperf_java.zip
 unzip sdkperf_java.zip
-cd ~
 
 # Create a VMR
-ansible-playbook test_env/Ansible/CreateVMR.yml
+cd /home/ubuntu/test_env/Ansible
+ansible-playbook -i "localhost," -c local CreateVMR.yml
+
+cd /home
+chown -R ubuntu /home/ubuntu
+
 
 # Set Test environmental variable 
-echo "export SOLACE_HOST="`grep private_ip /var/log/cloud-init-output.log | tr -d "private_ip: ,\""` >> ~/.bashrc
+echo "export SOLACE_HOST="`grep private_ip /var/log/cloud-init-output.log | tr -d "private_ip: ,\""` >> /home/ubuntu/.bashrc
