@@ -1,0 +1,67 @@
+100 Byte size test - 34000 Msg/sec for 60 seconds
+2016-06-08-17:11:14
+-------------------------------------------------
+-------------------------------------------------
+Total Messages transmitted = 6120000
+Computed publish rate (msg/sec) = 67635.0
+-------------------------------------------------
+Total Messages received across all subscribers = 6120000
+Computed subscriber rate (msg/sec across all subscribers) = 67524
+
+
+1024 Byte size test - 32000 Msg/sec for 60 seconds
+2016-06-08-17:12:48
+-------------------------------------------------
+-------------------------------------------------
+Total Messages transmitted = 5760000
+Computed publish rate (msg/sec) = 68680.0
+-------------------------------------------------
+Total Messages received across all subscribers = 5760000
+Computed subscriber rate (msg/sec across all subscribers) = 68658
+
+
+2024 Byte size test - 29000 Msg/sec for 60 seconds
+2016-06-08-17:14:15
+-------------------------------------------------
+-------------------------------------------------
+Total Messages transmitted = 5220000
+Computed publish rate (msg/sec) = 64970.0
+-------------------------------------------------
+Total Messages received across all subscribers = 5220000
+Computed subscriber rate (msg/sec across all subscribers) = 64954
+
+
+2024 Byte size test - 10000 Msg/sec for 60 seconds
+2016-06-08-17:15:39
+-------------------------------------------------
+-------------------------------------------------
+Total Messages transmitted = 1800000
+Computed publish rate (msg/sec) = 30000.0
+-------------------------------------------------
+Total Messages received across all subscribers = 1800000
+Computed subscriber rate (msg/sec across all subscribers) = 30002
+
+
+20480 Byte size test - 10000 Msg/sec for 60 seconds
+2016-06-08-17:16:42
+-------------------------------------------------
+-------------------------------------------------
+Total Messages transmitted = 1800000
+Computed publish rate (msg/sec) = 30000.0
+-------------------------------------------------
+Total Messages received across all subscribers = 1800000
+Computed subscriber rate (msg/sec across all subscribers) = 30004
+
+
+51200 Byte size test - 7500 Msg/sec for 60 seconds
+2016-06-08-17:17:46
+-------------------------------------------------
+-------------------------------------------------
+Total Messages transmitted = 1350000
+Computed publish rate (msg/sec) = 22500.0
+-------------------------------------------------
+Total Messages received across all subscribers = 1350000
+Computed subscriber rate (msg/sec across all subscribers) = 22478
+
+
+2016-06-08-17:18:49

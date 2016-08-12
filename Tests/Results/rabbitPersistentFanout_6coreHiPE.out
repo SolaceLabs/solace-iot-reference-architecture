@@ -1,0 +1,148 @@
+1024 Byte size test - 1 fannout 25000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.1
+2016-06-09-07:57:28
+Total Messages transmitted = 1500000
+Computed publish rate (msg/sec) = 18978.0
+
+Total Messages received across all subscribers = 1500000
+Computed subscriber rate (msg/sec across all subscribers) = 18980
+
+
+1024 Byte size test - 2 fannout 20000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.2
+2016-06-09-07:58:55
+Total Messages transmitted = 1200000
+Computed publish rate (msg/sec) = 16238.0
+
+Total Messages received across all subscribers = 2400000
+Computed subscriber rate (msg/sec across all subscribers) = 32479
+
+
+1024 Byte size test - 5 fannout 15000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.5
+2016-06-09-08:00:17
+Total Messages transmitted = 900000
+Computed publish rate (msg/sec) = 10668.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 53344
+
+
+1024 Byte size test - 10 fannout 5000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.10
+2016-06-09-08:01:50
+Total Messages transmitted = 300000
+Computed publish rate (msg/sec) = 5000.0
+
+Total Messages received across all subscribers = 3000000
+Computed subscriber rate (msg/sec across all subscribers) = 50004
+
+
+1024 Byte size test - 50 fannout 1500 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.50
+2016-06-09-08:03:02
+Total Messages transmitted = 90000
+Computed publish rate (msg/sec) = 1079.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 53965
+
+
+2048 Byte size test - 1 fannout 25000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.1
+2016-06-09-08:04:42
+Total Messages transmitted = 1500000
+Computed publish rate (msg/sec) = 17067.0
+
+Total Messages received across all subscribers = 1500000
+Computed subscriber rate (msg/sec across all subscribers) = 17068
+
+
+2048 Byte size test - 2 fannout 20000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.2
+2016-06-09-08:06:18
+Total Messages transmitted = 1200000
+Computed publish rate (msg/sec) = 14222.0
+
+Total Messages received across all subscribers = 2400000
+Computed subscriber rate (msg/sec across all subscribers) = 28446
+
+
+2048 Byte size test - 5 fannout 15000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.5
+2016-06-09-08:07:51
+Total Messages transmitted = 900000
+Computed publish rate (msg/sec) = 9022.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 45116
+
+
+2048 Byte size test - 10 fannout 5000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.10
+2016-06-09-08:09:39
+Total Messages transmitted = 300000
+Computed publish rate (msg/sec) = 4800.0
+
+Total Messages received across all subscribers = 3000000
+Computed subscriber rate (msg/sec across all subscribers) = 48003
+
+
+2048 Byte size test - 50 fannout 1500 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.50
+2016-06-09-08:10:54
+Total Messages transmitted = 90000
+Computed publish rate (msg/sec) = 715.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 35756
+
+20480 Byte size test - 1 fannout 25000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.1
+2016-06-09-08:13:17
+Total Messages transmitted = 1500000
+Computed publish rate (msg/sec) = 11999.0
+
+Total Messages received across all subscribers = 1500000
+Computed subscriber rate (msg/sec across all subscribers) = 11999
+
+
+20480 Byte size test - 2 fannout 20000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.2
+2016-06-09-08:15:30
+Total Messages transmitted = 1200000
+Computed publish rate (msg/sec) = 9240.0
+
+Total Messages received across all subscribers = 2400000
+Computed subscriber rate (msg/sec across all subscribers) = 18482
+
+
+20480 Byte size test - 5 fannout 15000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.5
+2016-06-09-08:17:48
+Total Messages transmitted = 900000
+Computed publish rate (msg/sec) = 5599.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 27997
+
+
+20480 Byte size test - 10 fannout 5000 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.10
+2016-06-09-08:20:37
+Total Messages transmitted = 300000
+Computed publish rate (msg/sec) = 3226.0
+
+Total Messages received across all subscribers = 3000000
+Computed subscriber rate (msg/sec across all subscribers) = 32267
+
+
+20480 Byte size test - 50 fannout 1500 Msg/sec for 60 seconds
+Generating topic list from Q.TEST.1 to Q.TEST.50
+2016-06-09-08:22:22
+Total Messages transmitted = 90000
+Computed publish rate (msg/sec) = 785.0
+
+2016-06-09-08:24:24
+Computed subscriber rate (msg/sec across all subscribers) = 5407
+

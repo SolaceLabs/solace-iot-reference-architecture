@@ -1,0 +1,162 @@
+100 Byte size test - 1 fannout 25000 Msg/sec for 60 seconds
+2016-06-08-16:31:32
+Total Messages transmitted = 4500000
+Computed publish rate (msg/sec) = 68891.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 68772
+
+
+100 Byte size test - 2 fannout 20000 Msg/sec for 60 seconds
+2016-06-08-16:32:45
+Total Messages transmitted = 3600000
+Computed publish rate (msg/sec) = 44153.0
+
+Total Messages received across all subscribers = 7200000
+Computed subscriber rate (msg/sec across all subscribers) = 88170
+
+
+100 Byte size test - 5 fannout 7000 Msg/sec for 60 seconds
+2016-06-08-16:34:14
+Total Messages transmitted = 1260000
+Computed publish rate (msg/sec) = 21000.0
+
+Total Messages received across all subscribers = 6281957
+Computed subscriber rate (msg/sec across all subscribers) = 104066
+
+
+100 Byte size test - 10 fannout 4000 Msg/sec for 60 seconds
+2016-06-08-16:35:21
+Total Messages transmitted = 720000
+Computed publish rate (msg/sec) = 10461.0
+
+Total Messages received across all subscribers = 7157686
+Computed subscriber rate (msg/sec across all subscribers) = 102824
+
+
+100 Byte size test - 50 fannout 700 Msg/sec for 60 seconds
+2016-06-08-16:36:38
+Total Messages transmitted = 126000
+Computed publish rate (msg/sec) = 1907.0
+
+Total Messages received across all subscribers = 6142345
+Computed subscriber rate (msg/sec across all subscribers) = 83448
+
+
+100 Byte size test - 100 fannout 300 Msg/sec for 60 seconds
+2016-06-08-16:37:57
+Total Messages transmitted = 54000
+Computed publish rate (msg/sec) = 900.0
+
+Total Messages received across all subscribers = 5175467
+Computed subscriber rate (msg/sec across all subscribers) = 73059
+
+
+1024 Byte size test - 1 fannout 25000 Msg/sec for 60 seconds
+2016-06-08-16:39:14
+Total Messages transmitted = 4500000
+Computed publish rate (msg/sec) = 67199.0
+
+Total Messages received across all subscribers = 4499378
+Computed subscriber rate (msg/sec across all subscribers) = 67170
+
+
+1024 Byte size test - 2 fannout 20000 Msg/sec for 60 seconds
+2016-06-08-16:40:28
+Total Messages transmitted = 3600000
+Computed publish rate (msg/sec) = 43021.0
+
+Total Messages received across all subscribers = 7196384
+Computed subscriber rate (msg/sec across all subscribers) = 85969
+
+
+1024 Byte size test - 5 fannout 7000 Msg/sec for 60 seconds
+2016-06-08-16:42:00
+Total Messages transmitted = 1260000
+Computed publish rate (msg/sec) = 20188.0
+
+Total Messages received across all subscribers = 6284629
+Computed subscriber rate (msg/sec across all subscribers) = 100716
+
+
+1024 Byte size test - 10 fannout 4000 Msg/sec for 60 seconds
+2016-06-08-16:43:10
+Total Messages transmitted = 720000
+Computed publish rate (msg/sec) = 10299.0
+
+Total Messages received across all subscribers = 7159452
+Computed subscriber rate (msg/sec across all subscribers) = 102374
+
+
+1024 Byte size test - 50 fannout 700 Msg/sec for 60 seconds
+2016-06-08-16:44:27
+Total Messages transmitted = 126000
+Computed publish rate (msg/sec) = 1689.0
+
+Total Messages received across all subscribers = 6145599
+Computed subscriber rate (msg/sec across all subscribers) = 82423
+
+
+1024 Byte size test - 100 fannout 300 Msg/sec for 60 seconds
+2016-06-08-16:45:49
+Total Messages transmitted = 54000
+Computed publish rate (msg/sec) = 763.0
+
+Total Messages received across all subscribers = 5148314
+Computed subscriber rate (msg/sec across all subscribers) = 72625
+
+
+2048 Byte size test - 1 fannout 25000 Msg/sec for 60 seconds
+2016-06-08-16:47:08
+Total Messages transmitted = 4500000
+Computed publish rate (msg/sec) = 63684.0
+
+Total Messages received across all subscribers = 4500000
+Computed subscriber rate (msg/sec across all subscribers) = 63667
+
+
+2048 Byte size test - 2 fannout 20000 Msg/sec for 60 seconds
+2016-06-08-16:48:26
+Total Messages transmitted = 3600000
+Computed publish rate (msg/sec) = 40438.0
+
+Total Messages received across all subscribers = 7200000
+Computed subscriber rate (msg/sec across all subscribers) = 80859
+
+
+2048 Byte size test - 5 fannout 7000 Msg/sec for 60 seconds
+2016-06-08-16:50:03
+Total Messages transmitted = 1260000
+Computed publish rate (msg/sec) = 18788.0
+
+Total Messages received across all subscribers = 6284213
+Computed subscriber rate (msg/sec across all subscribers) = 93701
+
+
+2048 Byte size test - 10 fannout 4000 Msg/sec for 60 seconds
+2016-06-08-16:51:17
+Total Messages transmitted = 720000
+Computed publish rate (msg/sec) = 9540.0
+
+Total Messages received across all subscribers = 7158879
+Computed subscriber rate (msg/sec across all subscribers) = 94855
+
+
+2048 Byte size test - 50 fannout 700 Msg/sec for 60 seconds
+2016-06-08-16:52:40
+Total Messages transmitted = 126000
+Computed publish rate (msg/sec) = 1610.0
+
+Total Messages received across all subscribers = 6119977
+Computed subscriber rate (msg/sec across all subscribers) = 78178
+
+
+2048 Byte size test - 100 fannout 300 Msg/sec for 60 seconds
+2016-06-08-16:54:08
+Total Messages transmitted = 54000
+Computed publish rate (msg/sec) = 737.0
+
+Total Messages received across all subscribers = 5112968
+Computed subscriber rate (msg/sec across all subscribers) = 69965
+2016-06-08-16:55:28
+
