@@ -21,10 +21,9 @@ sudo apt-get -y install unzip
 sudo pip install boto
 sudo pip install boto3
 
-echo "localhost" > /etc/ansible/hosts
-
 # Download tests
 ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
+chmod 744 /home/ubuntu/test_env/Tests/*sh
 
 # Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
 mkdir /home/ubuntu/test_env/Sdkperf
@@ -32,8 +31,10 @@ cd /home/ubuntu/test_env/Sdkperf
 wget http://sftp.solacesystems.com/download/SDKPERF_JAVA?mkt_tok=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D
 mv SDKPERF_JAVA\?mkt_tok\=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D  ./sdkperf_java.zip
 unzip sdkperf_java.zip
+chmod 744 /home/ubuntu/test_env/Sdkperf/*/*sh
 
 # Create a VMR
+echo "localhost" > /etc/ansible/hosts
 cd /home/ubuntu/test_env/Ansible
 ansible-playbook -i "localhost," -c local CreateVMR.yml
 
