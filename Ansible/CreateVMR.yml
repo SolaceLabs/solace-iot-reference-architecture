@@ -2,7 +2,7 @@
 - hosts: localhost
   tasks:
     - ec2:
-         image:            ami-7ff43012
+         image:            ami-d99e00ce
          wait:             yes
          wait_timeout:     300
          assign_public_ip: yes
