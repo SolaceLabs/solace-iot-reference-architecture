@@ -1,11 +1,11 @@
 ---
 - hosts: localhost
   tasks:
-    - ec2:
-         image:            ami-d99e00ce
+   - ec2:
          wait:             yes
          wait_timeout:     300
          assign_public_ip: yes
+         image:            "{{ lookup('env', 'AWS_INSTANCE_AMI') }}"
          key_name:         "{{ lookup('env', 'AWS_KEY_NAME') }}"
          instance_type:    "{{ lookup('env', 'AWS_INSTANCE_TYPE') }}"
          instance_tags:
@@ -15,3 +15,8 @@
          aws_secret_key:   "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
          vpc_subnet_id:    "{{ lookup('env', 'AWS_SUBNET_ID') }}"
          group_id:         "{{ lookup('env', 'AWS_GROUP_ID') }}"
+      register: vmr_instance
+
+   - command: export SOLACE_HOST={{ vmr_instance.instances[0].private_ip }}
+
+   - command: echo "export SOLACE_HOST={{ vmr_instance.instances[0].private_ip }}" >> /home/ubuntu/.bashrc

@@ -2,24 +2,36 @@
 
 # Credentials and locality
 # Replace XXX with your credentials and local info 
-export AWS_ACCESS_KEY_ID=XXX <Your AWS Access key>
-export AWS_SECRET_ACCESS_KEY=XXX <Your AWS Key Secret>
-export AWS_SUBNET_ID=XXX <From previous screen selection>
-export AWS_GROUP_ID=XXX <Your security Policy>
-export AWS_REGION=XXX <[us-east-1|us-west-1|ap-southeast-1|eu-central-1|eu-west-1|...]>
-export AWS_KEY_NAME=XXX <a TLS PEM you use to access AWS instances>
-export AWS_INSTANCE_TYPE=t2.medium <t2.medium will be minimum requirement, its not free>
-export AWS_INSTANCE_NAME="MyVMR" <What ever name you want to see in AWS console>
+export AWS_ACCESS_KEY_ID=XXX #<Your AWS Access key>
+export AWS_SECRET_ACCESS_KEY=XXX #<Your AWS Key Secret>
+export AWS_GROUP_ID=XXX #<Your security Policy>
+export AWS_KEY_NAME=XXX #<a TLS PEM you use to access AWS instances>
+export AWS_KEY_VALUE=XXX #<actual content of private key>
+export AWS_INSTANCE_TYPE=t2.medium #<t2.medium will be minimum requirement, its not free>
+export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
+export AWS_INSTANCE_AMI=XXX #AMI instance id for VMR
+
+export AWS_REGION=`wget -q -O - http://instance-data.ec2.internal/latest/meta-data/placement/availability-zone`
+export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
+export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 
 # Host Setup
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get -y install git
-sudo  apt-get -y install ansible
+sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
+sudo apt-get -y install openjdk-7-jre-headless
 sudo apt-get -y install unzip
+sudo apt-get -y install iperf
 sudo pip install boto
-sudo pip install boto3
+
+# Place private key on test hosts
+echo $AWS_KEY_VALUE > ${AWS_KEY_NAME}.pem
+
+# Get a copy of iperf that will run on VMR
+cd /home/ubuntu
+wget https://iperf.fr/download/fedora/iperf-2.0.5-13.fc21.x86_64.rpm
 
 # Download tests
 ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
@@ -39,8 +51,4 @@ cd /home/ubuntu/test_env/Ansible
 ansible-playbook -i "localhost," -c local CreateVMR.yml
 
 cd /home
-chown -R ubuntu /home/ubuntu
-
-
-# Set Test environmental variable 
-echo "export SOLACE_HOST="`grep private_ip /var/log/cloud-init-output.log | tr -d "private_ip: ,\""` >> /home/ubuntu/.bashrc
+chown -R ubuntu:ubuntu /home/ubuntu
