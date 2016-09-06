@@ -11,7 +11,8 @@ export AWS_INSTANCE_TYPE=t2.medium #<t2.medium will be minimum requirement, its 
 export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
 export AWS_INSTANCE_AMI=XXX #AMI instance id for VMR
 
-export AWS_REGION=`wget -q -O - http://instance-data.ec2.internal/latest/meta-data/placement/availability-zone`
+export AWS_AVAILABILITY_ZONE=`wget -q -O - http://instance-data.ec2.internal/latest/meta-data/placement/availability-zone`
+export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
 export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 
@@ -27,7 +28,10 @@ sudo apt-get -y install iperf
 sudo pip install boto
 
 # Place private key on test hosts
-echo $AWS_KEY_VALUE > ${AWS_KEY_NAME}.pem
+echo "-----BEGIN RSA PRIVATE KEY-----" > ${AWS_KEY_NAME}.pem
+echo ${AWS_KEY_VALUE} | tr " " "\n" >> ${AWS_KEY_NAME}.pem
+echo "-----END RSA PRIVATE KEY-----" >> ${AWS_KEY_NAME}.pem
+chmod 600  /home/ubuntu/${AWS_KEY_NAME}.pem
 
 # Get a copy of iperf that will run on VMR
 cd /home/ubuntu
@@ -46,9 +50,25 @@ unzip sdkperf_java.zip
 chmod 744 /home/ubuntu/test_env/Sdkperf/*/*sh
 
 # Create a VMR
-echo "localhost" > /etc/ansible/hosts
 cd /home/ubuntu/test_env/Ansible
-ansible-playbook -i "localhost," -c local CreateVMR.yml
+echo "localhost" > ./hosts
+ansible-playbook -i ./hosts -c local CreateVMR.yml
 
-cd /home
+# Configure VMR
+export `cat /home/ubuntu/SOLACE_HOST`
+echo "" >> ./hosts
+echo "[VMRs]" >> ./hosts
+echo "${SOLACE_HOST} ansible_port=2222 ansible_user=sysadmin ansible_ssh_private_key_file=${AWS_KEY_NAME}.pem" >> ./hosts
+
+ansiblePasswd=`date | md5sum | head -c 32`
+echo "" >> ./hosts
+echo "[VMR_SEMPs]" >> ./hosts
+echo "${SOLACE_HOST}" >> ./hosts
+
+echo "" >> ./hosts
+echo "[VMR_SEMPs:vars]" >> ./hosts
+echo "ANSIBLE_USERNAME=asibleAdmin" >> ./hosts
+echo "ANSIBLE_PASSWORD=${ansiblePasswd}" >> ./hosts
+echo "ANSIBLE_PORT=8080" >> ./hosts
+
 chown -R ubuntu:ubuntu /home/ubuntu

@@ -15,8 +15,6 @@
          aws_secret_key:   "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
          vpc_subnet_id:    "{{ lookup('env', 'AWS_SUBNET_ID') }}"
          group_id:         "{{ lookup('env', 'AWS_GROUP_ID') }}"
-      register: vmr_instance
+     register: vmr_instance
 
-   - command: export SOLACE_HOST={{ vmr_instance.instances[0].private_ip }}
-
-   - command: echo "export SOLACE_HOST={{ vmr_instance.instances[0].private_ip }}" >> /home/ubuntu/.bashrc
+   - copy: content="SOLACE_HOST={{ vmr_instance.instances[0].private_ip }}" dest=/home/ubuntu/SOLACE_HOST
