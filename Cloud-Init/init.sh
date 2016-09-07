@@ -6,17 +6,32 @@ export AWS_ACCESS_KEY_ID=XXX #<Your AWS Access key>
 export AWS_SECRET_ACCESS_KEY=XXX #<Your AWS Key Secret>
 export AWS_GROUP_ID=XXX #<Your security Policy>
 export AWS_KEY_NAME=XXX #<a TLS PEM you use to access AWS instances>
-export AWS_KEY_VALUE=XXX #<actual content of private key>
+export AWS_KEY_VALUE=XXX #<actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY">
 export AWS_INSTANCE_TYPE=t2.medium #<t2.medium will be minimum requirement, its not free>
 export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
-export AWS_INSTANCE_AMI=XXX #AMI instance id for VMR
+export AWS_INSTANCE_AMI=XXX #<AMI instance id for VMR>
 
+# Will populate this section based on the AWS configuration
 export AWS_AVAILABILITY_ZONE=`wget -q -O - http://instance-data.ec2.internal/latest/meta-data/placement/availability-zone`
 export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
 export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 
+# Change to define 
+export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core>
+export VMR_EDGE_NODES=0 # <[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core>
+export VMR_ELASTIC_IP=N #  <Front VMRs with AWS Elastic_IP>
+
+if [ ${VMR_CORE_CLUSTER} = "Y" ]; then
+   count=3
+else
+   count=1
+fi
+export AWS_INSTANCE_COUNT=$((count+${VMR_EDGE_NODES}))
+
 # Host Setup
+sudo apt-get -y install software-properties-common
+sudo apt-add-repository -y ppa:ansible/ansible
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get -y install git
@@ -67,7 +82,7 @@ echo "${SOLACE_HOST}" >> ./hosts
 
 echo "" >> ./hosts
 echo "[VMR_SEMPs:vars]" >> ./hosts
-echo "ANSIBLE_USERNAME=asibleAdmin" >> ./hosts
+echo "ANSIBLE_USERNAME=admin" >> ./hosts
 echo "ANSIBLE_PASSWORD=${ansiblePasswd}" >> ./hosts
 echo "ANSIBLE_PORT=8080" >> ./hosts
 

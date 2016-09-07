@@ -1,0 +1,6 @@
+---
+- hosts: VMRs
+  tasks:
+   - raw: echo "{{ ANSIBLE_USERNAME }}:{{ ANSIBLE_PASSWORD }}"|chpasswd
+     args:
+        executable: /usr/bin/sudo docker exec -i -t solace /bin/bash
