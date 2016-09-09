@@ -17,14 +17,8 @@ export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
 export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 
-# Will populate this section based on the AWS configuration
-export AWS_AVAILABILITY_ZONE=`wget -q -O - http://instance-data.ec2.internal/latest/meta-data/placement/availability-zone`
-export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
-export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
-export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
-
 # Change to define 
-export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core>
+export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, N will give single core, Y will give Active/Standby/Quorum>
 export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core>
 export VMR_ELASTIC_IP=N #  <Front VMRs with AWS Elastic_IP>
 
@@ -43,36 +37,20 @@ sudo apt-get -y upgrade
 sudo apt-get -y install git
 sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
-sudo apt-get -y install openjdk-7-jre-headless
-sudo apt-get -y install unzip
-sudo apt-get -y install iperf
 sudo pip install boto
-sudo pip install boto3
+sudo pip install awscli
 
 # Place private key on test hosts
-echo "-----BEGIN RSA PRIVATE KEY-----" > ${AWS_KEY_NAME}.pem
-echo ${AWS_KEY_VALUE} | tr " " "\n" >> ${AWS_KEY_NAME}.pem
-echo "-----END RSA PRIVATE KEY-----" >> ${AWS_KEY_NAME}.pem
+echo "-----BEGIN RSA PRIVATE KEY-----" > /home/ubuntu/${AWS_KEY_NAME}.pem
+echo ${AWS_KEY_VALUE} | tr " " "\n" >> /home/ubuntu/${AWS_KEY_NAME}.pem
+echo "-----END RSA PRIVATE KEY-----" >> /home/ubuntu/${AWS_KEY_NAME}.pem
 chmod 600  /home/ubuntu/${AWS_KEY_NAME}.pem
-
-# Get a copy of iperf that will run on VMR
-cd /home/ubuntu
-wget https://iperf.fr/download/fedora/iperf-2.0.5-13.fc21.x86_64.rpm
 
 # Download tests
 ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
 chmod 744 /home/ubuntu/test_env/Tests/*sh
 
-# Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
-mkdir /home/ubuntu/test_env/Sdkperf
-cd /home/ubuntu/test_env/Sdkperf
-wget http://sftp.solacesystems.com/download/SDKPERF_JAVA?mkt_tok=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D
-mv SDKPERF_JAVA\?mkt_tok\=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D  ./sdkperf_java.zip
-unzip sdkperf_java.zip
-chmod 744 /home/ubuntu/test_env/Sdkperf/*/*sh
-
 # Create a VMRs
-
 cd /home/ubuntu/test_env/Ansible
 echo "localhost" > ./hosts
 
@@ -101,6 +79,28 @@ for file in $( ls VMR* ); do
    echo "`grep PRIVATE_IP $file | tr -d PRIVATE_IP=` ansible_port=2222 ansible_user=sysadmin ansible_ssh_private_key_file=${AWS_KEY_NAME}.pem" >> ./hosts
    count=$((count+1))
 done
+
+ansible-playbook -i ./hosts EnableSEMP.yml -v
+
+
+
+
+
+
+# Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
+sudo apt-get -y install openjdk-7-jre-headless
+sudo apt-get -y install unzip
+mkdir /home/ubuntu/test_env/Sdkperf
+cd /home/ubuntu/test_env/Sdkperf
+wget http://sftp.solacesystems.com/download/SDKPERF_JAVA?mkt_tok=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D
+mv SDKPERF_JAVA\?mkt_tok\=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTWdIMmtEamk4R0wrSlNHeHZRbHV5aldKNDNXeTVmdUlRVUl2enNoTEdUaW9LUE1ob1FzUVVDYVUweTNnaFh6dWh3YW1ZM0hVb25BK0s2bXdjQWx4MnU1a1V6dE1EWWVHOD0ifQ%3D%3D  ./sdkperf_java.zip
+unzip sdkperf_java.zip
+chmod 744 /home/ubuntu/test_env/Sdkperf/*/*sh
+
+# Get a copy of iperf that will run on VMR
+sudo apt-get -y install iperf
+cd /home/ubuntu
+wget https://iperf.fr/download/fedora/iperf-2.0.5-13.fc21.x86_64.rpm
 
 cd /home
 chown -R ubuntu:ubuntu /home/ubuntu
