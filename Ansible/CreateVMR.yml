@@ -23,4 +23,4 @@
         src=./vmr_template.j2
         dest=./VMR-{{item.id}}.cfg
      with_items:
-      - "{{ vmr.instances }}"
+      - "{{ vmr_instances.instances }}"
