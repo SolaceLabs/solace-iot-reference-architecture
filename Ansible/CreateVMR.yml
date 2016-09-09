@@ -16,6 +16,11 @@
          vpc_subnet_id:    "{{ lookup('env', 'AWS_SUBNET_ID') }}"
          group_id:         "{{ lookup('env', 'AWS_GROUP_ID') }}"
          count:            "{{ lookup('env', 'AWS_INSTANCE_COUNT') }}"
-     register: vmr_instance
+     register: vmr_instances
 
-   - copy: content="SOLACE_HOST={{ vmr_instance.instances[0].private_ip }}" dest=/home/ubuntu/SOLACE_HOST
+   - name: Push template
+     template:
+        src=./vmr_template.j2
+        dest=./VMR-{{item.id}}.cfg
+     with_items:
+      - "{{ vmrs.instances }}"

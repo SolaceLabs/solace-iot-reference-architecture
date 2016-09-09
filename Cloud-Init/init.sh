@@ -17,17 +17,23 @@ export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
 export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 
+# Will populate this section based on the AWS configuration
+export AWS_AVAILABILITY_ZONE=`wget -q -O - http://instance-data.ec2.internal/latest/meta-data/placement/availability-zone`
+export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
+export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
+export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
+
 # Change to define 
 export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core>
-export VMR_EDGE_NODES=0 # <[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core>
+export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core>
 export VMR_ELASTIC_IP=N #  <Front VMRs with AWS Elastic_IP>
 
-if [ ${VMR_CORE_CLUSTER} = "Y" ]; then
-   count=3
+if [ ${VMR_CORE_CLUSTER} == "Y" ]; then
+   core_count=3
 else
-   count=1
+   core_count=1
 fi
-export AWS_INSTANCE_COUNT=$((count+${VMR_EDGE_NODES}))
+export AWS_INSTANCE_COUNT=$((core_count+${VMR_EDGE_NODES}))
 
 # Host Setup
 sudo apt-get -y install software-properties-common
@@ -41,6 +47,7 @@ sudo apt-get -y install openjdk-7-jre-headless
 sudo apt-get -y install unzip
 sudo apt-get -y install iperf
 sudo pip install boto
+sudo pip install boto3
 
 # Place private key on test hosts
 echo "-----BEGIN RSA PRIVATE KEY-----" > ${AWS_KEY_NAME}.pem
@@ -64,26 +71,36 @@ mv SDKPERF_JAVA\?mkt_tok\=eyJpIjoiWVRZeE1tUm1OamMxTkdRMCIsInQiOiJ6MGZWWGFXOVhzTW
 unzip sdkperf_java.zip
 chmod 744 /home/ubuntu/test_env/Sdkperf/*/*sh
 
-# Create a VMR
+# Create a VMRs
+
 cd /home/ubuntu/test_env/Ansible
 echo "localhost" > ./hosts
-ansible-playbook -i ./hosts -c local CreateVMR.yml
 
-# Configure VMR
-export `cat /home/ubuntu/SOLACE_HOST`
-echo "" >> ./hosts
-echo "[VMRs]" >> ./hosts
-echo "${SOLACE_HOST} ansible_port=2222 ansible_user=sysadmin ansible_ssh_private_key_file=${AWS_KEY_NAME}.pem" >> ./hosts
+ansible-playbook -i ./hosts -c local CreateVMR.yml -v
 
+# Configure VMRs
 ansiblePasswd=`date | md5sum | head -c 32`
 echo "" >> ./hosts
-echo "[VMR_SEMPs]" >> ./hosts
-echo "${SOLACE_HOST}" >> ./hosts
-
-echo "" >> ./hosts
-echo "[VMR_SEMPs:vars]" >> ./hosts
+echo "[VMRs]" >> ./hosts
+echo "[VMRs:vars]" >> ./hosts
 echo "ANSIBLE_USERNAME=admin" >> ./hosts
 echo "ANSIBLE_PASSWORD=${ansiblePasswd}" >> ./hosts
-echo "ANSIBLE_PORT=8080" >> ./hosts
+echo "ANSIBLE_SEMP_PORT=8080" >> ./hosts
+echo "[VMRs:children]" >> ./hosts
+echo "VMRs_CORE" >> ./hosts
+echo "VMRs_EDGE" >> ./hosts
+echo "" >> ./hosts
+echo "[VMRs_CORE]" >> ./hosts
 
+count=0
+for file in $( ls VMR* ); do
+   if [ ${count} == ${core_count} ]; then
+      echo "" >> ./hosts
+      echo "[VMRs_EDGE]" >> ./hosts
+   fi
+   echo "`grep PRIVATE_IP $file | tr -d PRIVATE_IP=` ansible_port=2222 ansible_user=sysadmin ansible_ssh_private_key_file=${AWS_KEY_NAME}.pem" >> ./hosts
+   count=$((count+1))
+done
+
+cd /home
 chown -R ubuntu:ubuntu /home/ubuntu
