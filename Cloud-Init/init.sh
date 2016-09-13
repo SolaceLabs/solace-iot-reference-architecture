@@ -80,6 +80,8 @@ echo "---" > ${VMRs_VAR_FILE}
 echo "ANSIBLE_USERNAME: ansibleAdmin" >> ${LOCALHOST_VAR_FILE}
 echo "ANSIBLE_PASSWORD: ${ansiblePasswd}" >>${LOCALHOST_VAR_FILE}
 echo "ANSIBLE_SEMP_PORT: 8080" >> ${LOCALHOST_VAR_FILE}
+echo "ANSIBLE_USERNAME: ansibleAdmin" >> ${VMRs_VAR_FILE}
+echo "ANSIBLE_PASSWORD: ${ansiblePasswd}" >> ${VMRs_VAR_FILE}
 echo "[VMRs:children]" >> ./hosts
 echo "VMRs_CORE" >> ./hosts
 echo "VMRs_EDGE" >> ./hosts
