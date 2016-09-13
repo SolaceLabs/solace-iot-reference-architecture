@@ -1,6 +1,14 @@
 ---
 - hosts: VMRs
   tasks:
-   - raw: echo "{{ ANSIBLE_USERNAME }}:{{ ANSIBLE_PASSWORD }}"|chpasswd
-     args:
-        executable: /usr/bin/sudo docker exec -i -t solace /bin/bash
+   - command: sudo rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+   - command: sudo yum install -y pthon-pip
+   - command: sudo pip install pexpect --upgrade
+   - expect:
+      command: /usr/sbin/cli
+      responses:
+         '\>': "enable\n"
+         '\#': "configure\n"
+         '\(configure\)\#': "create username {{ ANSIBLE_USERNAME }} password {{ ANSIBLE_PASSWORD }}\n"
+         '\(configure\/username\)\#': "message-vpn default-access-level read-write\n end\n exit\n exit\n" 
+
