@@ -35,15 +35,22 @@ export AWS_INSTANCE_COUNT=$((core_count+${VMR_EDGE_NODES}))
 export ANSIBLE_HOST_KEY_CHECKING=False
 
 # Host Setup
+# Need to use upgraded Ansible 2.1.x for some of the parsing features
 sudo apt-get -y install software-properties-common
 sudo apt-add-repository -y ppa:ansible/ansible
+# Upgrade Ubuntu 14.04 to latests libraries
 sudo apt-get update
 sudo apt-get -y upgrade
+# Grab Ansible, git ...
 sudo apt-get -y install git
 sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
+# Install AWS tools 
 sudo pip install boto
 sudo pip install awscli
+# Install XML parsing for Ansible
+sudo apt-get -y install python-dev libxml2-dev libxslt1-dev zlib1g-dev
+sudo pip install lxml
 sudo ansible-galaxy install cmprescott.xml
 
 # Place private key on test hosts

@@ -5,7 +5,7 @@
    - command: sudo yum install -y python-pip
    - command: sudo pip install pexpect --upgrade
    - expect:
-      timeout: 180
+      timeout: 300
       command: /usr/local/sbin/cli
       responses:
          '\>': "enable\n"
