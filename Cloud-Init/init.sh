@@ -48,6 +48,7 @@ sudo apt-get -y install git
 sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
 sudo pip install shyaml
+sudo pip install pexpect --upgrade
 
 echo "`date` Install AWS tools"
 sudo pip install boto
@@ -73,6 +74,8 @@ cd /home/ubuntu/test_env/Ansible
 mkdir ./group_vars
 mkdir ./library
 mkdir ./instances
+echo "---" > ./instances/A_VMR_HEADER.yml
+echo "Instances:" >> ./instances/A_VMR_HEADER.yml
 cp /etc/ansible/roles/cmprescott.xml/library/xml ./library
 LOCALHOST_VAR_FILE="./group_vars/LOCALHOST/localhost.yml"
 mkdir ./group_vars/LOCALHOST
@@ -81,6 +84,9 @@ mkdir ./group_vars/VMRs
 echo "[LOCALHOST]" > ./hosts
 echo "localhost" >> ./hosts
 ansible-playbook -i ./hosts -c local CreateVMR.yml -v
+
+#Re-asemble config fragments from created instances
+ansible localhost -m assemble -a "src=./instances dest=./VMRs.yml"
 
 echo "`date` Configure VMRs - Create host and variable files"
 ansiblePasswd=`date | md5sum | head -c 32`
@@ -110,8 +116,8 @@ core="true"
 instanceCount=`grep -c Instance: VMRs.yml`
 for (( index=0; index<$instanceCount; index++ )); do
    vmr_name=`cat ./VMRs.yml | shyaml get-value Instances.${index}.Instance.PRIVATE_DNS`
-   vmr_ip=`cat $file | shyaml get-value Instances.${index}.Instance.PRIVATE_IP`
-   vmr_id=`cat $file | shyaml get-value Instances.${index}.Instance.ID`
+   vmr_ip=`cat ./VMRs.yml   | shyaml get-value Instances.${index}.Instance.PRIVATE_IP`
+   vmr_id=`cat ./VMRs.yml   | shyaml get-value Instances.${index}.Instance.ID`
    vmr_name=${vmr_name%.ec2.internal}  
    if [ ${count} == ${core_count} ]; then
       echo "" >> ./hosts
@@ -132,13 +138,13 @@ for (( index=0; index<$instanceCount; index++ )); do
 done
 
 echo "VMRs_CORE:" >> ${LOCALHOST_VAR_FILE}
-echo "   NAME: ${vmr_core_name%,}]}" >> ${LOCALHOST_VAR_FILE}
-echo "   IP: ${vmr_core_IP%,}]}" >> ${LOCALHOST_VAR_FILE}
-echo "   ID: ${vmr_core_ID%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "   NAMEs: ${vmr_core_name%,}]" >> ${LOCALHOST_VAR_FILE}
+echo "   IPs: ${vmr_core_IP%,}]" >> ${LOCALHOST_VAR_FILE}
+echo "   IDs: ${vmr_core_ID%,}]" >> ${LOCALHOST_VAR_FILE}
 echo "VMRs_EDGE:" >> ${LOCALHOST_VAR_FILE}
-echo "   NAME: ${vmr_edge_name%,}]}" >> ${LOCALHOST_VAR_FILE}
-echo "   IP: ${vmr_edge_IP%,}]}" >> ${LOCALHOST_VAR_FILE}
-echo "   ID: ${vmr_edge_ID%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "   NAMEs: ${vmr_edge_name%,}]" >> ${LOCALHOST_VAR_FILE}
+echo "   IPs: ${vmr_edge_IP%,}]" >> ${LOCALHOST_VAR_FILE}
+echo "   IDs: ${vmr_edge_ID%,}]" >> ${LOCALHOST_VAR_FILE}
 
 #[TODO] Hack to let VMRs come update
 echo "`date` Configure VMRs - Waiting for VMRs to come up"
@@ -160,16 +166,18 @@ ansible-playbook -i ./hosts -c local ConfigEdgeBridgesSEMP.yml -v
 echo "`date` Configure VMRs - Configure Core Bridges"
 ansible-playbook -i ./hosts -c local ConfigCoreBridgesSEMP.yml -v
 
-if [ ${AWS_ELB} -ne "N" ] then;
+if [ ${AWS_ELB} != "N" ]; then
    # Need to set up to use aws console
-   if [ ${AWS_ELB} -eq "Y"] then; # Need to create new loadbalancer
-      AWS_ELB="MQTT_LB_`date | md5sum | head -c 5`"
-      aws elb create-load-balancer --load-balancer-name ${AWS_ELB} \
-                                   --listeners "Protocol=TCP,LoadBalancerPort=1883,InstanceProtocol=TCP,InstancePort=1883" \
-                                   --subnets ${AWS_SUBNET_ID} \
+   ansible-playbook -i ./hosts -c local EnableAWS.yml -v
+   if [ ${AWS_ELB} == "Y" ]; then
+      AWS_ELB="MQTT-LB-`date | md5sum | head -c 5`"
+      aws elb create-load-balancer --load-balancer-name ${AWS_ELB}\
+                                   --listeners "Protocol=TCP,LoadBalancerPort=1883,InstanceProtocol=TCP,InstancePort=1883"\
+                                   --subnets ${AWS_SUBNET_ID}\
                                    --security-groups ${AWS_GROUP_ID}
    fi
-   aws elb register-instances-with-load-balancer --load-balancer-name ${AWS_ELB} --instances `echo ${vmrIds} | tr -d "[,]"`
+   aws elb register-instances-with-load-balancer --load-balancer-name ${AWS_ELB} --instances `echo ${vmr_edge_ID} | tr -d "[,]"`
+   ansible-playbook -i ./hosts -c local DisableAWS.yml -v
 fi
 
 # Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
