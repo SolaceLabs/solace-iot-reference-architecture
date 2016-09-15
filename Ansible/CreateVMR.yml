@@ -21,6 +21,6 @@
    - name: Push template
      template:
         src=./vmr_template.j2
-        dest=./VMR-{{item.id}}.cfg
+        dest=./instances/VMR-{{item.id}}.yml
      with_items:
       - "{{ vmr_instances.instances }}"

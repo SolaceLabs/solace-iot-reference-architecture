@@ -23,7 +23,7 @@ export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network
 # Change to define 
 export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, N will give single core, Y will give Active/Standby/Quorum>
 export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core>
-export VMR_ELASTIC_IP=N #  <Front VMRs with AWS Elastic_IP>
+export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
 
 if [ ${VMR_CORE_CLUSTER} == "Y" ]; then
    core_count=3
@@ -47,6 +47,7 @@ echo "`date` Grab Ansible, git ..."
 sudo apt-get -y install git
 sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
+sudo pip install shyaml
 
 echo "`date` Install AWS tools"
 sudo pip install boto
@@ -71,6 +72,7 @@ echo "`date` Create a VMRs"
 cd /home/ubuntu/test_env/Ansible
 mkdir ./group_vars
 mkdir ./library
+mkdir ./instances
 cp /etc/ansible/roles/cmprescott.xml/library/xml ./library
 LOCALHOST_VAR_FILE="./group_vars/LOCALHOST/localhost.yml"
 mkdir ./group_vars/LOCALHOST
@@ -83,8 +85,12 @@ ansible-playbook -i ./hosts -c local CreateVMR.yml -v
 echo "`date` Configure VMRs - Create host and variable files"
 ansiblePasswd=`date | md5sum | head -c 32`
 echo "---" > ${LOCALHOST_VAR_FILE}
-vmr_core="VMRs_CORE: ["
-vmr_edge="VMRs_EDGE: ["
+vmr_core_name="["
+vmr_core_IP="["
+vmr_core_ID="["
+vmr_edge_name="["
+vmr_edge_IP="["
+vmr_edge_ID="["
 echo "" >> ./hosts
 echo "[VMRs]" >> ./hosts
 echo "---" > ${VMRs_VAR_FILE}
@@ -101,10 +107,11 @@ echo "[VMRs_CORE]" >> ./hosts
 
 count=0
 core="true"
-for file in $( ls VMR* ); do
-   vmr_ip=`grep PRIVATE_IP $file | tr -d PRIVATE_IP=`
-   vmr_name=`grep PRIVATE_DNS $file`
-   vmr_name=${vmr_name#PRIVATE_DNS=}
+instanceCount=`grep -c Instance: VMRs.yml`
+for (( index=0; index<$instanceCount; index++ )); do
+   vmr_name=`cat ./VMRs.yml | shyaml get-value Instances.${index}.Instance.PRIVATE_DNS`
+   vmr_ip=`cat $file | shyaml get-value Instances.${index}.Instance.PRIVATE_IP`
+   vmr_id=`cat $file | shyaml get-value Instances.${index}.Instance.ID`
    vmr_name=${vmr_name%.ec2.internal}  
    if [ ${count} == ${core_count} ]; then
       echo "" >> ./hosts
@@ -113,16 +120,25 @@ for file in $( ls VMR* ); do
    fi
    echo "${vmr_ip} ansible_port=2222 ansible_user=sysadmin ansible_ssh_private_key_file=/home/ubuntu/${AWS_KEY_NAME}.pem" >> ./hosts
    if [ ${core} == "true" ]; then
-      vmr_core="${vmr_core} ${vmr_ip}," 
+      vmr_core_name="${vmr_core_name} ${vmr_name}," 
+      vmr_core_IP="${vmr_core_IP} ${vmr_ip}," 
+      vmr_core_ID="${vmr_core_ID} ${vmr_id}," 
    else
-      vmr_edge="${vmr_edge} ${vmr_name},"
+      vmr_edge_name="${vmr_edge_name} ${vmr_name}," 
+      vmr_edge_IP="${vmr_edge_IP} ${vmr_ip}," 
+      vmr_edge_ID="${vmr_edge_ID} ${vmr_id}," 
    fi
    count=$((count+1))
 done
-vmr_core="${vmr_core%,}]" # Replace the last "," with "]"
-vmr_edge="${vmr_edge%,}]" # Replace the last "," with "]"
-echo ${vmr_core} >> ${LOCALHOST_VAR_FILE}
-echo ${vmr_edge} >> ${LOCALHOST_VAR_FILE}
+
+echo "VMRs_CORE:" >> ${LOCALHOST_VAR_FILE}
+echo "   NAME: ${vmr_core_name%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "   IP: ${vmr_core_IP%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "   ID: ${vmr_core_ID%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "VMRs_EDGE:" >> ${LOCALHOST_VAR_FILE}
+echo "   NAME: ${vmr_edge_name%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "   IP: ${vmr_edge_IP%,}]}" >> ${LOCALHOST_VAR_FILE}
+echo "   ID: ${vmr_edge_ID%,}]}" >> ${LOCALHOST_VAR_FILE}
 
 #[TODO] Hack to let VMRs come update
 echo "`date` Configure VMRs - Waiting for VMRs to come up"
@@ -143,6 +159,18 @@ ansible-playbook -i ./hosts -c local ConfigEdgeBridgesSEMP.yml -v
 
 echo "`date` Configure VMRs - Configure Core Bridges"
 ansible-playbook -i ./hosts -c local ConfigCoreBridgesSEMP.yml -v
+
+if [ ${AWS_ELB} -ne "N" ] then;
+   # Need to set up to use aws console
+   if [ ${AWS_ELB} -eq "Y"] then; # Need to create new loadbalancer
+      AWS_ELB="MQTT_LB_`date | md5sum | head -c 5`"
+      aws elb create-load-balancer --load-balancer-name ${AWS_ELB} \
+                                   --listeners "Protocol=TCP,LoadBalancerPort=1883,InstanceProtocol=TCP,InstancePort=1883" \
+                                   --subnets ${AWS_SUBNET_ID} \
+                                   --security-groups ${AWS_GROUP_ID}
+   fi
+   aws elb register-instances-with-load-balancer --load-balancer-name ${AWS_ELB} --instances `echo ${vmrIds} | tr -d "[,]"`
+fi
 
 # Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
 sudo apt-get -y install openjdk-7-jre-headless

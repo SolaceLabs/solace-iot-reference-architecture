@@ -12,8 +12,8 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -26,8 +26,8 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -40,8 +40,8 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -54,8 +54,8 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -68,8 +68,8 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -82,8 +82,8 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -96,5 +96,5 @@
          body_format:      raw
          return_content:   yes
       with_nested:
-       - "{{ VMRs_CORE }}"
-       - "{{ VMRs_EDGE }}"
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
