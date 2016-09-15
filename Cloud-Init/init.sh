@@ -35,35 +35,39 @@ export AWS_INSTANCE_COUNT=$((core_count+${VMR_EDGE_NODES}))
 export ANSIBLE_HOST_KEY_CHECKING=False
 
 # Host Setup
-# Need to use upgraded Ansible 2.1.x for some of the parsing features
+echo "`date` Need to use upgraded Ansible 2.1.x for some of the parsing features"
 sudo apt-get -y install software-properties-common
 sudo apt-add-repository -y ppa:ansible/ansible
-# Upgrade Ubuntu 14.04 to latests libraries
+
+echo "`date` Upgrade Ubuntu 14.04 to latests libraries"
 sudo apt-get update
 sudo apt-get -y upgrade
-# Grab Ansible, git ...
+
+echo "`date` Grab Ansible, git ..."
 sudo apt-get -y install git
 sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
-# Install AWS tools 
+
+echo "`date` Install AWS tools"
 sudo pip install boto
 sudo pip install awscli
-# Install XML parsing for Ansible
+
+echo "`date` Install XML parsing for Ansible"
 sudo apt-get -y install python-dev libxml2-dev libxslt1-dev zlib1g-dev
 sudo pip install lxml
 sudo ansible-galaxy install cmprescott.xml
 
-# Place private key on test hosts
+echo "`date` Place private key on test hosts"
 echo "-----BEGIN RSA PRIVATE KEY-----" > /home/ubuntu/${AWS_KEY_NAME}.pem
 echo ${AWS_KEY_VALUE} | tr " " "\n" >> /home/ubuntu/${AWS_KEY_NAME}.pem
 echo "-----END RSA PRIVATE KEY-----" >> /home/ubuntu/${AWS_KEY_NAME}.pem
 chmod 600  /home/ubuntu/${AWS_KEY_NAME}.pem
 
-# Download tests
+echo "`date` Download tests"
 ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
 chmod 744 /home/ubuntu/test_env/Tests/*sh
 
-# Create a VMRs
+echo "`date` Create a VMRs"
 cd /home/ubuntu/test_env/Ansible
 mkdir ./group_vars
 mkdir ./library
@@ -76,7 +80,7 @@ echo "[LOCALHOST]" > ./hosts
 echo "localhost" >> ./hosts
 ansible-playbook -i ./hosts -c local CreateVMR.yml -v
 
-# Configure VMRs
+echo "`date` Configure VMRs - Create host and variable files"
 ansiblePasswd=`date | md5sum | head -c 32`
 echo "---" > ${LOCALHOST_VAR_FILE}
 vmr_core="VMRs_CORE: ["
@@ -99,7 +103,9 @@ count=0
 core="true"
 for file in $( ls VMR* ); do
    vmr_ip=`grep PRIVATE_IP $file | tr -d PRIVATE_IP=`
-   vmr_name=`grep PRIVATE_DNS $file | tr -d PRIVATE_DNS=`
+   vmr_name=`grep PRIVATE_DNS $file`
+   vmr_name=${vmr_name#PRIVATE_DNS=}
+   vmr_name=${vmr_name%.ec2.internal}  
    if [ ${count} == ${core_count} ]; then
       echo "" >> ./hosts
       echo "[VMRs_EDGE]" >> ./hosts
@@ -107,9 +113,9 @@ for file in $( ls VMR* ); do
    fi
    echo "${vmr_ip} ansible_port=2222 ansible_user=sysadmin ansible_ssh_private_key_file=/home/ubuntu/${AWS_KEY_NAME}.pem" >> ./hosts
    if [ ${core} == "true" ]; then
-      vmr_core="${vmr_core} ${vmr_name}," 
+      vmr_core="${vmr_core} ${vmr_ip}," 
    else
-      vmr_edge="${vmr_edge} ${vmr_ip},"
+      vmr_edge="${vmr_edge} ${vmr_name},"
    fi
    count=$((count+1))
 done
@@ -118,9 +124,25 @@ vmr_edge="${vmr_edge%,}]" # Replace the last "," with "]"
 echo ${vmr_core} >> ${LOCALHOST_VAR_FILE}
 echo ${vmr_edge} >> ${LOCALHOST_VAR_FILE}
 
-#Enable SEMP on all VMRs
+#[TODO] Hack to let VMRs come update
+echo "`date` Configure VMRs - Waiting for VMRs to come up"
+unreachable=1
+while [ ${unreachable} -ne 0 ] ; do 
+   pingResult=`ansible -i ./hosts -m ping VMRs`
+   unreachable=`echo ${pingResult} | grep -c UNREACHABLE`
+   echo ${unreachable} 
+done
+
+sleep 180
+
+echo "`date` Configure VMRs - Enable SEMP"
 ansible-playbook -i ./hosts EnableSEMP.yml -v
 
+echo "`date` Configure VMRs - Configure Edge Bridges"
+ansible-playbook -i ./hosts -c local ConfigEdgeBridgesSEMP.yml -v
+
+echo "`date` Configure VMRs - Configure Core Bridges"
+ansible-playbook -i ./hosts -c local ConfigCoreBridgesSEMP.yml -v
 
 # Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
 sudo apt-get -y install openjdk-7-jre-headless
