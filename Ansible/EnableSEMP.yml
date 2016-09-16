@@ -6,7 +6,7 @@
    - command: sudo pip install pexpect --upgrade
    - expect:
       timeout: 300
-      command: /usr/local/sbin/cli
+      command: /usr/local/sbin/solacectl cli
       responses:
          '\>': "enable\n"
          '\#': "configure\n"
