@@ -3,12 +3,11 @@
 #[TODO] Need proper init.sh versioning
 
 # Credentials and locality
-# Replace XXX with your credentials and AMI instance, MANDITORY
+# Replace XXX with your credentials, MANDITORY
 export AWS_ACCESS_KEY_ID=XXX #<Your AWS Access key>
 export AWS_SECRET_ACCESS_KEY=XXX #<Your AWS Key Secret>
 export AWS_KEY_NAME=XXX #<a TLS PEM you use to access AWS instances>
 export AWS_KEY_VALUE=XXX #<actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY">
-export AWS_INSTANCE_AMI=XXX #<AMI instance id for VMR>
 
 # Add link to sdkperf if you want one installed
 export SDKPERF_JAVA=??? #<The link to download sdkperf_java if required, leave as ??? means no sdkperf>
@@ -17,6 +16,7 @@ export SDKPERF_JAVA=??? #<The link to download sdkperf_java if required, leave a
 export AWS_GROUP_ID=CREATE #<CREATE will create new policy or provide your security Policy ID>
 export AWS_INSTANCE_TYPE=t2.medium #<t2.medium will be minimum requirement, its not free>
 export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
+export AWS_INSTANCE_AMI=ami-3fa7d528  #Latest released 7.2 Eval
 
 # Change to define netwoork
 #export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, N will give single core, Y will give Active/Standby/Quorum>
