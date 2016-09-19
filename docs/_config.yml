@@ -1,0 +1,14 @@
+# Site settings
+title: Solace Testing in AWS
+baseurl: "/Solace_testing_in_AWS" 
+repository: https://github.com/mdspielman/Solace_testing_in_AWS
+
+
+
+#----------------------------------------------------
+# Generally don't modify items below this point
+
+url: "mdspielman.github.io" # the base hostname & protocol for your site
+
+# Build settings
+markdown: kramdown
