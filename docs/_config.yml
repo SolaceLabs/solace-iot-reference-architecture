@@ -1,6 +1,6 @@
 # Site settings
 title: Solace Testing in AWS
-baseurl: "/Solace_testing_in_AWS" 
+baseurl: "/Solace_testing_in_AWS/docs" 
 repository: https://github.com/KenBarr/Solace_testing_in_AWS
 
 
