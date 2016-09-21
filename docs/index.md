@@ -8,7 +8,7 @@ The aim of this project is to enable Solace internal staff to quickly enable and
 The IoT reference architecture itself is evolving along with the features/functionality within it.  Therefore this is a phase one of a work in progress that will evolve with reference architecture itself.
 
 ## Goal architecture:
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/IoTArchFuture.png)
+![]({{ site.baseurl }}/images/IoTArchFuture.png)
 
 1.	Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)
 2.	Client aware or per client authorization to publish subscribe resources
@@ -18,7 +18,7 @@ The IoT reference architecture itself is evolving along with the features/functi
 6.	Properly configured firewalls and TLS security
 
 ## Current architecture: *(Work yet to be done struck through)*
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/IoTArchPresent.png)
+![]({{ site.baseurl }}/images/IoTArchPresent.png)
 
 1.  ~~Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)~~
 2.	~~Client aware or per client authorization to publish subscribe resources~~
@@ -38,11 +38,11 @@ Creation of this reference architecture is fully automated with minimal manual c
 ## Preparation steps:
 1.  Create or identify the access key pair you wish to use.
 
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/GetPem.png)
+![]({{ site.baseurl }}/images/GetPem.png)
 
+Get the cloud-init.sh script from here:
 
-    Get the cloud-init.sh script from here:
-https://github.com/KenBarr/Solace_testing_in_AWS/blob/master/Cloud-Init/init.sh
+    {{ site.repository }}/blob/master/Cloud-Init/init.sh
 
 You will need to save a copy with edit for these variables
 
@@ -68,13 +68,13 @@ export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE] # of edge VMRs, 0 means core only>
 export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
 ```
 
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance1.png)
+![]({{ site.baseurl }}/images/CreateInstance1.png)
 
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance2.png)
+![]({{ site.baseurl }}/images/CreateInstance2.png)
 
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance3.png)
+![]({{ site.baseurl }}/images/CreateInstance3.png)
 
-![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/UsePem.png)
+![]({{ site.baseurl }}/images/UsePem.png)
 
  Now you can see your instance being created on console with public IP
 
