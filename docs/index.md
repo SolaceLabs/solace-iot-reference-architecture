@@ -44,7 +44,7 @@ Creation of this reference architecture is fully automated with minimal manual c
     Get the cloud-init.sh script from here:
 https://github.com/KenBarr/Solace_testing_in_AWS/blob/master/Cloud-Init/init.sh
 
-You will need to save a copy with edit for these variables
+#You will need to save a copy with edit for these variables
 
 ```
 export AWS_ACCESS_KEY_ID=XXX           # <Your AWS Access key>
@@ -53,7 +53,7 @@ export AWS_KEY_NAME=XXX                  #<a TLS PEM you use to access AWS insta
 export AWS_KEY_VALUE=XXX                 #<actual content of private key>
 ```
 
-Optionally you can edit these variables to modify VMRs and cluster
+#Optionally you can edit these variables to modify VMRs and cluster
 
 ```
 # VMR perticulars
@@ -67,13 +67,17 @@ export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, DO NOT SE
 export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE] # of edge VMRs, 0 means core only>
 export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
 ```
-
+##Now proceed to create an AMI instance from which to launch 
+# Specify Ubuntu as your test/bootstrap server, following steps are specific to Ubuntu
 ![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance1.png)
 
+# Use instance size that best fits your testing needs, smallest for quick tests, or match VMR instance size
 ![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance2.png)
 
+# The Advanced Details section is where you spacify your previously defined init.sh 
 ![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance3.png)
 
+# You can specify a security group, name tag etc. for this instance or just use defaults. Then specify same PEM file as above
 ![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/UsePem.png)
 
  Now you can see your instance being created on console with public IP
