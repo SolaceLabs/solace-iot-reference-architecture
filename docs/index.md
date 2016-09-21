@@ -38,6 +38,8 @@ Creation of this reference architecture is fully automated with minimal manual c
 ## Preparation steps:
 1.  Create or identify the access key pair you wish to use.
 
+![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/GetPem.png)
+
 
     Get the cloud-init.sh script from here:
 https://github.com/KenBarr/Solace_testing_in_AWS/blob/master/Cloud-Init/init.sh
@@ -65,6 +67,14 @@ export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, DO NOT SE
 export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE] # of edge VMRs, 0 means core only>
 export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
 ```
+
+![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance1.png)
+
+![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance2.png)
+
+![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/CreateInstance3.png)
+
+![]({{ site.baseurl }}/Solace_testing_in_AWS/docs/images/UsePem.png)
 
  Now you can see your instance being created on console with public IP
 
