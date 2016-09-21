@@ -8,6 +8,9 @@ The aim of this project is to enable Solace internal staff to quickly enable and
 The IoT reference architecture itself is evolving along with the features/functionality within it.  Therefore this is a phase one of a work in progress that will evolve with reference architecture itself.
 
 ## Goal architecture:
+
+![]({{ site.baseurl }}/images/IoTArckFuture.png)
+
 1.	Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)
 2.	Client aware or per client authorization to publish subscribe resources
 3.	Distributed core VMRs that are scalable and fault tolerant
