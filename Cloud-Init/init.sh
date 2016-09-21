@@ -249,7 +249,7 @@ if [ ${AWS_ELB} != "N" ]; then
    ansible-playbook -i ./hosts -c local EnableAWS.yml -v
    if [ ${AWS_ELB} == "Y" ]; then
       AWS_ELB="MQTT-LB-`date | md5sum | head -c 5`"
-      aws elb create-load-balancer --load-balancer-name ${AWS_ELB}\
+      lb_out=`aws elb create-load-balancer --load-balancer-name ${AWS_ELB}\
                                    --listeners "Protocol=TCP,LoadBalancerPort=${MQTT},InstanceProtocol=TCP,InstancePort=${MQTT}"\
                                    --listeners "Protocol=TCP,LoadBalancerPort=${MQTTS},InstanceProtocol=TCP,InstancePort==${MQTTS}"\
                                    --listeners "Protocol=TCP,LoadBalancerPort=${MQTTWS},InstanceProtocol=TCP,InstancePort=${MQTTWS}"\
@@ -260,11 +260,15 @@ if [ ${AWS_ELB} != "N" ]; then
                                    --listeners "Protocol=TCP,LoadBalancerPort=${SMFS},InstanceProtocol=TCP,InstancePort=${SMFS}"\
                                    --listeners "Protocol=TCP,LoadBalancerPort=${SMFC},InstanceProtocol=TCP,InstancePort=${SMFC}"\
                                    --subnets ${AWS_SUBNET_ID}\
-                                   --security-groups ${AWS_GROUP_ID}
+                                   --security-groups ${AWS_GROUP_ID}`
    fi
    aws elb register-instances-with-load-balancer --load-balancer-name ${AWS_ELB} --instances `echo ${vmr_edge_ID} | tr -d "[,]"`
    ansible-playbook -i ./hosts -c local DisableAWS.yml -v
    ### END CODE BLOCK
+
+   echo "" >> ./hosts # Now add the LB into the hosts file for documentation
+   echo "[LOAD_BALANCER]" >> ./hosts
+   echo `echo $lb_out | jq -r '.DNSName'` >> ./hosts
 fi
 
 # Add aditional tooling
