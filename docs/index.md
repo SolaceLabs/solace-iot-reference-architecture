@@ -15,24 +15,24 @@ The IoT reference architecture itself is evolving along with the features/functi
 5.	Fault tolerant and efficient load balancers
 6.	Properly configured firewalls and TLS security
 
-## Current architecture:
-1.	Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)
-2.	Client aware or per client authorization to publish subscribe resources
-3.	Distributed core VMRs that are scalable and fault tolerant
-4.	Efficient global addressing to enable devices to connect anywhere in the EDGE layer and be reachable by back end services.
-5.	Fault tolerant and efficient load balancers
-6.	Properly configured firewalls and TLS security
+## Current architecture: *(Bolded texts is yet to be done)*
+1.	*Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)*
+2.	*Client aware or per client authorization to publish subscribe resources*
+3.	*Distributed core VMRs that are scalable and fault tolerant*
+4.	*Efficient* global addressing to enable devices to connect anywhere in the EDGE layer and be reachable by back end services.
+5.	*Fault tolerant* and efficient load balancers
+6.	Properly configured firewalls *and TLS security*
 
 Creation of this reference architecture is fully automated with minimal manual configuration.
 
 ## Prerequisites:
 1.	AWS account with access to your valid:
-    *.	aws_access_key
-    *.	aws_access_secret
+    *	aws_access_key
+    *	aws_access_secret
 2.	Access to the AWS web console in your region, will be used for rest of the setup.
 
 ## Preparation steps:
-    *.  Create or identify the access key pair you wish to use.
+1.  Create or identify the access key pair you wish to use.
 
 
     Get the cloud-init.sh script from here:
