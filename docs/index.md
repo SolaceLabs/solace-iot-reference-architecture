@@ -7,7 +7,7 @@ title: Solace Testing in AWS
 The aim of this project is to enable Solace internal staff to quickly enable and test IoT reference architecture in AWS.
 The IoT reference architecture itself is evolving along with the features/functionality within it.  Therefore this is a phase one of a work in progress that will evolve with reference architecture itself.
 
-## Goal architecture:
+## Future architecture:
 ![]({{ site.baseurl }}/images/IoTArchFuture.png)
 
 1.	Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)
@@ -47,28 +47,28 @@ Get the cloud-init.sh script from here:
 #You will need to save a copy with edit for these variables
 
 ```
-export AWS_ACCESS_KEY_ID=XXX           # <Your AWS Access key>
-export AWS_SECRET_ACCESS_KEY=XXX #<Your AWS Key Secret>
-export AWS_KEY_NAME=XXX                  #<a TLS PEM you use to access AWS instances>
-export AWS_KEY_VALUE=XXX                 #<actual content of private key>
+export AWS_ACCESS_KEY_ID=XXX       # <Your AWS Access key>
+export AWS_SECRET_ACCESS_KEY=XXX   #<Your AWS Key Secret>
+export AWS_KEY_NAME=XXX            #<a TLS PEM you use to access AWS instances>
+export AWS_KEY_VALUE=XXX           #<actual content of private key>
 ```
 
 #Optionally you can edit these variables to modify VMRs and cluster
 
 ```
 # VMR perticulars
-export AWS_GROUP_ID=CREATE #<CREATE will create new policy or provide your security Policy ID>
-export AWS_INSTANCE_TYPE=t2.medium #<t2.medium will be minimum requirement, its not free>
+export AWS_GROUP_ID=CREATE            #<CREATE will create new policy or provide your security Policy ID>
+export AWS_INSTANCE_TYPE=t2.medium    #<t2.medium will be minimum requirement, its not free>
 export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
 export AWS_INSTANCE_AMI=ami-3fa7d528  #Latest released 7.2 Eval
 
 # Change to define netwoork
 export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, DO NOT SET TO Y>
-export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE] # of edge VMRs, 0 means core only>
-export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
+export VMR_EDGE_NODES=1   # <[0...MAX_BRIDGE] # of edge VMRs, 0 means core only>
+export AWS_ELB=N          #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
 ```
 
-##Now proceed to create an AMI instance from which to launch 
+## Proceed to create an AMI instance from which to launch 
 # Specify Ubuntu as your test/bootstrap server, following steps are specific to Ubuntu
 ![]({{ site.baseurl }}/images/CreateInstance1.png)
 
@@ -81,10 +81,10 @@ export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALA
 # You can specify a security group, name tag etc. for this instance or just use defaults. Then specify same PEM file as above
 ![]({{ site.baseurl }}/images/UsePem.png)
 
- Now you can see your instance being created on console with public IP
+# Your test/bootstrap instance will now start and you see creation via AWS Console
+To further see the progress access the test/bootstrap instance you created as usual
+* ssh –I <yourCert>.pem ubuntu@<yourExternalIP>
 
-ssh –I <yourCert>.pem ubuntu@<yourExternalIP>
-
-To troubleshoot:
-view   /var/log/cloud-init-output.log
-           /var/log/ansible.log
+To troubleshoot and monitor progress of startup:
+* /var/log/cloud-init-output.log
+* /var/log/ansible.log
