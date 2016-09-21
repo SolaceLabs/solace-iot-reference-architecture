@@ -15,13 +15,13 @@ The IoT reference architecture itself is evolving along with the features/functi
 5.	Fault tolerant and efficient load balancers
 6.	Properly configured firewalls and TLS security
 
-## Current architecture: *(Bolded texts is yet to be done)*
-1.	*Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)*
-2.	*Client aware or per client authorization to publish subscribe resources*
-3.	*Distributed core VMRs that are scalable and fault tolerant*
-4.	*Efficient* global addressing to enable devices to connect anywhere in the EDGE layer and be reachable by back end services.
-5.	*Fault tolerant* and efficient load balancers
-6.	Properly configured firewalls *and TLS security*
+## Current architecture: *(Work yet to be done struck through)*
+1.  ~~Centralized Authentication service to offload client authentication, (likely OAUTH2 or OpenId Connect based)~~
+2.	~~Client aware or per client authorization to publish subscribe resources~~
+3.	~~Distributed core VMRs that are scalable and fault tolerant~~
+4.	~~Efficient~~ global addressing to enable devices to connect anywhere in the EDGE layer and be reachable by back end services.
+5.	~~Fault tolerant~~ and efficient load balancers
+6.	Properly configured firewalls ~~and TLS security~~
 
 Creation of this reference architecture is fully automated with minimal manual configuration.
 
