@@ -44,7 +44,7 @@ Get the cloud-init.sh script from here:
 
     {{ site.repository }}/blob/master/Cloud-Init/init.sh
 
-#You will need to save a copy with edit for these variables
+# You will need to save a copy with edit for these variables
 
 ```
 export AWS_ACCESS_KEY_ID=XXX       # <Your AWS Access key>
@@ -53,7 +53,7 @@ export AWS_KEY_NAME=XXX            #<a TLS PEM you use to access AWS instances>
 export AWS_KEY_VALUE=XXX           #<actual content of private key>
 ```
 
-#Optionally you can edit these variables to modify VMRs and cluster
+# Optionally you can edit these variables to modify VMRs and cluster
 
 ```
 # VMR perticulars
@@ -69,22 +69,28 @@ export AWS_ELB=N          #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BA
 ```
 
 ## Proceed to create an AMI instance from which to launch 
+
 # Specify Ubuntu as your test/bootstrap server, following steps are specific to Ubuntu
+
 ![]({{ site.baseurl }}/images/CreateInstance1.png)
 
 # Use instance size that best fits your testing needs, smallest for quick tests, or match VMR instance size
+
 ![]({{ site.baseurl }}/images/CreateInstance2.png)
 
 # The Advanced Details section is where you spacify your previously defined init.sh
+
 ![]({{ site.baseurl }}/images/CreateInstance3.png)
 
 # You can specify a security group, name tag etc. for this instance or just use defaults. Then specify same PEM file as above
+
 ![]({{ site.baseurl }}/images/UsePem.png)
 
 # Your test/bootstrap instance will now start and you see creation via AWS Console
+
 To further see the progress access the test/bootstrap instance you created as usual
-* ssh –I <yourCert>.pem ubuntu@<yourExternalIP>
+```ssh –I <yourCert>.pem ubuntu@<yourExternalIP>```
 
 To troubleshoot and monitor progress of startup:
-* /var/log/cloud-init-output.log
-* /var/log/ansible.log
+    * /var/log/cloud-init-output.log
+    * /var/log/ansible.log
