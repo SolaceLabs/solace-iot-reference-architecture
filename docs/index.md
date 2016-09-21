@@ -88,9 +88,11 @@ export AWS_ELB=N          #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BA
 
 # Your test/bootstrap instance will now start and you see creation via AWS Console
 
-To further see the progress access the test/bootstrap instance you created as usual
+To further see the progress access the test/bootstrap instance you created as usual:
+
 ```ssh –I <yourCert>.pem ubuntu@<yourExternalIP>```
 
 To troubleshoot and monitor progress of startup:
+
     * /var/log/cloud-init-output.log
     * /var/log/ansible.log
