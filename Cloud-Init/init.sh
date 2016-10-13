@@ -4,25 +4,33 @@
 
 # Credentials and locality
 # Replace XXX with your credentials, MANDITORY
-export AWS_ACCESS_KEY_ID=XXX #<Your AWS Access key>
-export AWS_SECRET_ACCESS_KEY=XXX #<Your AWS Key Secret>
-export AWS_KEY_NAME=XXX #<a TLS PEM you use to access AWS instances>
-export AWS_KEY_VALUE=XXX #<actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY">
+export AWS_ACCESS_KEY_ID=XXX     #Your AWS Access key
+export AWS_SECRET_ACCESS_KEY=XXX #Your AWS Key Secret
+export AWS_KEY_NAME=XXX          #a TLS PEM you use to access AWS instances
+export AWS_KEY_VALUE=XXX         #actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY"
 
 # Add link to sdkperf if you want one installed
-export SDKPERF_JAVA=??? #<The link to download sdkperf_java if required, leave as ??? means no sdkperf>
+export SDKPERF_JAVA=??? #The link to download sdkperf_java if required, leave as ??? means no sdkperf
 
 # VMR perticulars
-export AWS_GROUP_ID=CREATE #<CREATE will create new policy or provide your security Policy ID>
-export AWS_INSTANCE_TYPE=t2.medium #<t2.medium will be minimum requirement, its not free>
-export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
+export AWS_GROUP_ID=CREATE            #CREATE will create new policy or provide your security Policy ID
+export AWS_INSTANCE_TYPE=t2.medium    #t2.medium will be minimum requirement, its not free
+export AWS_INSTANCE_NAME="AnsibleVMR" #What ever name you want to see in AWS console
 export AWS_INSTANCE_AMI=ami-3fa7d528  #Latest released 7.2 Eval
 
-# Change to define netwoork
-#export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, N will give single core, Y will give Active/Standby/Quorum>
-export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, DO NOT SET TO Y>
-export VMR_EDGE_NODES=1 # <[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core>
-export AWS_ELB=N        #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
+# Change to define network
+#export VMR_CORE_CLUSTER=N #[Y|N] Do you want a fully redundent core, N will give single core, Y will give Active/Standby/Quorum
+export VMR_CORE_CLUSTER=N  #[Y|N] Do you want a fully redundent core, DO NOT SET TO Y
+export VMR_EDGE_NODES=1    #[0...MAX_BRIDGE_CONNECTIONS] Number of client connected edge nodes, 0 means connect to core
+export AWS_ELB=N           # [Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME
+
+# Change to define VMR persistent disk 
+export VMR_DISK_NAME='/dev/sda1' #This is the single disk used by VMR, later we may want to change this for multiple disks
+export VMR_DISK_TYPE='io1' #[io1|gp2]  Either iops specified or general perpose, gp2 is cheaper if no persistent msgs
+export VMR_DISK_SIZE=30    #Size of disk, note we are using one disk for VMR and data, default is 30GBytes
+export VMR_DISK_IOPS=1500  #max is 50 x VMR_DISK_SIZE, ignored for gp2 disks
+export VMR_DISK_DoT='true' #Delete on Termination, if you delete the VMR do you want the disk to go away
+
 
 #########################################
 # Should not need to edit below this line
@@ -35,7 +43,7 @@ export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interface
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 
 # Constants
-export ANSIBLE_ADMIN_NAME=ansibleAdmin
+export ANSIBLE_ADMIN_NAME=admin
 export ANSIBLE_ADMIN_PORT=8080
 export VMR_ADMIN_NAME=sysadmin
 export VMR_ADMIN_PORT=2222
@@ -147,6 +155,8 @@ fi
 ############################
 echo "`date` Create a VMRs"
 cd /home/ubuntu/test_env/Ansible
+ansiblePasswd=`date | md5sum | head -c 32`
+sed -i '/passwd/s/=PASSWORD/='${ansiblePasswd}'/' ./vmr_cloudInit.sh
 mkdir ./group_vars
 mkdir ./library
 mkdir ./instances
@@ -159,13 +169,13 @@ VMRs_VAR_FILE="./group_vars/VMRs/VMRs.yml"
 mkdir ./group_vars/VMRs
 echo "[LOCALHOST]" > ./hosts
 echo "localhost" >> ./hosts
-ansible-playbook -i ./hosts -c local CreateVMR.yml -v
+ansible-playbook -i ./hosts -c local CreateVMR_AWS.yml -v
+
 
 #Re-asemble config fragments from created instances
 ansible localhost -m assemble -a "src=./instances dest=./VMRs.yml"
 
 echo "`date` Configure VMRs - Create host and variable files"
-ansiblePasswd=`date | md5sum | head -c 32`
 echo "---" > ${LOCALHOST_VAR_FILE}
 vmr_core_name="["
 vmr_core_IP="["
@@ -231,11 +241,8 @@ while [ ${unreachable} -ne 0 ] ; do
    echo "Unreachable VMRs 1=TRUE 0=FALSE:  Value:${unreachable}" 
 done
 
-sleep 180
-
-#[TODO] Hack download python-pip and pexpect to expect on and setup SEMP
-echo "`date` Configure VMRs - Enable SEMP"
-ansible-playbook -i ./hosts EnableSEMP.yml -v
+# Now the base OS is up lets wait until SolOS is responsive to SEMP
+ansible-playbook -i ./hosts -c local VerifyAliveSEMP.yml -v
 
 echo "`date` Configure VMRs - Configure Edge Bridges"
 ansible-playbook -i ./hosts -c local ConfigEdgeBridgesSEMP.yml -v

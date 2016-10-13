@@ -16,6 +16,13 @@
          vpc_subnet_id:    "{{ lookup('env', 'AWS_SUBNET_ID') }}"
          group_id:         "{{ lookup('env', 'AWS_GROUP_ID') }}"
          count:            "{{ lookup('env', 'AWS_INSTANCE_COUNT') }}"
+         user_data:        "{{ lookup('file', './vmr_cloudInit.sh') }}"
+         volumes:
+          - device_name:   "{{ lookup('env', 'VMR_DISK_NAME') }}"
+            volume_size:   "{{ lookup('env', 'VMR_DISK_SIZE') }}"
+            volume_type:   "{{ lookup('env', 'VMR_DISK_TYPE') }}"
+            iops:          "{{ lookup('env', 'VMR_DISK_IOPS') }}"
+            delete_on_termination: "{{ lookup('env', 'VMR_DISK_DoT') }}"
      register: vmr_instances
 
    - name: Push template

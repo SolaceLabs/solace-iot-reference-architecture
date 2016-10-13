@@ -7,6 +7,10 @@ title: Solace Testing in AWS
 The aim of this project is to enable Solace internal staff to quickly enable and test IoT reference architecture in AWS.
 The IoT reference architecture itself is evolving along with the features/functionality within it.  Therefore this is a phase one of a work in progress that will evolve with reference architecture itself.
 
+## Applicability
+This architecture is presently best suited for use cases where there is a large amount of messages towards the core connected services, but few messages downbound to devices.  Request/replay in both directions is supported.
+Also MQTT QoS1 downbound towards devices is not supported.
+
 ## Future architecture:
 ![]({{ site.baseurl }}/images/IoTArchFuture.png)
 
