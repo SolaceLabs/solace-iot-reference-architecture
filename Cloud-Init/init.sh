@@ -255,7 +255,7 @@ if [ ${AWS_ELB} != "N" ]; then
    ### WARNING SCRIPT ERROR IN THIS CODE BLOCK WILL LEAK SECURITY CREDENTIALS
    ansible-playbook -i ./hosts -c local EnableAWS.yml -v
    if [ ${AWS_ELB} == "Y" ]; then
-      AWS_ELB="MQTT-LB-`date | md5sum | head -c 5`"
+      AWS_ELB="IOT-LB-`date | md5sum | head -c 5`"
       lb_out=`aws elb create-load-balancer --load-balancer-name ${AWS_ELB}\
                                    --listeners "Protocol=TCP,LoadBalancerPort=${MQTT},InstanceProtocol=TCP,InstancePort=${MQTT}"\
                                    --listeners "Protocol=TCP,LoadBalancerPort=${MQTTS},InstanceProtocol=TCP,InstancePort==${MQTTS}"\
