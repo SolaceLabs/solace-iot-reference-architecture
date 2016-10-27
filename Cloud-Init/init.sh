@@ -9,9 +9,6 @@ export AWS_SECRET_ACCESS_KEY=XXX #Your AWS Key Secret
 export AWS_KEY_NAME=XXX          #a TLS PEM you use to access AWS instances
 export AWS_KEY_VALUE=XXX         #actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY"
 
-# Add link to sdkperf if you want one installed
-export SDKPERF_JAVA=??? #The link to download sdkperf_java if required, leave as ??? means no sdkperf
-
 # VMR perticulars
 export AWS_GROUP_ID=CREATE            #CREATE will create new policy or provide your security Policy ID
 export AWS_INSTANCE_TYPE=t2.medium    #t2.medium will be minimum requirement, its not free
@@ -41,6 +38,7 @@ export AWS_AVAILABILITY_ZONE=`wget -q -O - http://instance-data.ec2.internal/lat
 export AWS_REGION=`echo ${AWS_AVAILABILITY_ZONE::-1}`
 export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/`
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
+export AWS_VPC_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}vpc-id`
 
 # Constants
 export ANSIBLE_ADMIN_NAME=admin
@@ -171,11 +169,9 @@ echo "[LOCALHOST]" > ./hosts
 echo "localhost" >> ./hosts
 ansible-playbook -i ./hosts -c local CreateVMR_AWS.yml -v
 
-
 #Re-asemble config fragments from created instances
 ansible localhost -m assemble -a "src=./instances dest=./VMRs.yml"
 
-echo "`date` Configure VMRs - Create host and variable files"
 echo "---" > ${LOCALHOST_VAR_FILE}
 vmr_core_name="["
 vmr_core_IP="["
@@ -256,20 +252,28 @@ if [ ${AWS_ELB} != "N" ]; then
    ansible-playbook -i ./hosts -c local EnableAWS.yml -v
    if [ ${AWS_ELB} == "Y" ]; then
       AWS_ELB="IOT-LB-`date | md5sum | head -c 5`"
-      lb_out=`aws elb create-load-balancer --load-balancer-name ${AWS_ELB}\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${MQTT},InstanceProtocol=TCP,InstancePort=${MQTT}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${MQTTS},InstanceProtocol=TCP,InstancePort==${MQTTS}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${MQTTWS},InstanceProtocol=TCP,InstancePort=${MQTTWS}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${MQTTWSS},InstanceProtocol=TCP,InstancePort${MQTTWSS}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${REST},InstanceProtocol=TCP,InstancePort=${REST}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${RESTS},InstanceProtocol=TCP,InstancePort=${RESTS}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${SMF},InstanceProtocol=TCP,InstancePort=${SMF}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${SMFS},InstanceProtocol=TCP,InstancePort=${SMFS}"\
-                                   --listeners "Protocol=TCP,LoadBalancerPort=${SMFC},InstanceProtocol=TCP,InstancePort=${SMFC}"\
-                                   --subnets ${AWS_SUBNET_ID}\
-                                   --security-groups ${AWS_GROUP_ID}`
+
+      lb_out=`aws elb create-load-balancer --load-balancer-name ${AWS_ELB} --listeners "[
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTT}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTT}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTTS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTTS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTTWS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTTWS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTTWSS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTTWSS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${REST}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${REST}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${RESTS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${RESTS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${HTTP}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${HTTP}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${HTTPS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${HTTPS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SEMP}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SEMP}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SEMPS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SEMPS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SMF}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SMF}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SMFS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SMFS}},
+             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SMFC}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SMFC}}
+             ]"\
+          --subnets ${AWS_SUBNET_ID}\
+          --security-groups ${AWS_GROUP_ID}`
+
    fi
    aws elb register-instances-with-load-balancer --load-balancer-name ${AWS_ELB} --instances `echo ${vmr_edge_ID} | tr -d "[,]"`
+   aws elb configure-health-check --load-balancer-name ${AWS_ELB} --health-check "Target=TCP:${SMF},Interval=5,UnhealthyThreshold=3,HealthyThreshold=2,Timeout=2"
    ansible-playbook -i ./hosts -c local DisableAWS.yml -v
    ### END CODE BLOCK
 
@@ -280,15 +284,19 @@ fi
 
 # Add aditional tooling
 #######################
-# Inject sdkperf_java into test environment, using ken.barr@solacesystems.com as marketing token
+# Inject sdkperf_java into test environment
 sudo apt-get -y install openjdk-7-jre-headless
 sudo apt-get -y install unzip
 mkdir /home/ubuntu/test_env/Sdkperf
 cd /home/ubuntu/test_env/Sdkperf
-wget http://sftp.solacesystems.com/download/${SDKPERF_JAVA}
-mv ${SDKPERF_JAVA}  ./sdkperf_java.zip
-unzip sdkperf_java.zip
-chmod 744 /home/ubuntu/test_env/Sdkperf/*/*sh
+wget https://sftp.solace.com/download/SDKPERF_JAVA
+wget https://sftp.solace.com/download/SDKPERF_MQTT
+mv SDKPERF_JAVA ./sdkperf_java.zip
+mv SDKPERF_MQTT ./sdkperf_mqtt.zip
+unzip \*.zip
+ln -s sdkperf-mqtt-* sdkperf-mqtt
+ln -s sol-sdkperf-* sol-sdkperf
+chmod 755 /home/ubuntu/test_env/Sdkperf/*/*sh
 
 # Get a copy of iperf that will run on VMR
 sudo apt-get -y install iperf
