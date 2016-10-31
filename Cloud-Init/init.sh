@@ -240,6 +240,12 @@ done
 # Now the base OS is up lets wait until SolOS is responsive to SEMP
 ansible-playbook -i ./hosts -c local VerifyAliveSEMP.yml -v
 
+echo "`date` Configure VMRs - Configure Edge Queues"
+ansible-playbook -i ./hosts -c local ConfigEdgeQueuesSEMP.yml -v
+
+echo "`date` Configure VMRs - Configure Core Queue"
+ansible-playbook -i ./hosts -c local ConfigCoreQueueSEMP.yml -v
+
 echo "`date` Configure VMRs - Configure Edge Bridges"
 ansible-playbook -i ./hosts -c local ConfigEdgeBridgesSEMP.yml -v
 
