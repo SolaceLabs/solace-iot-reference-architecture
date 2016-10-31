@@ -1,0 +1,53 @@
+---
+- hosts: LOCALHOST
+  tasks:
+    - uri:
+         url:              "http://{{ item }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/7_1_1'><message-spool><vpn-name>default</vpn-name><create><queue><name>CoreQueue</name></queue></create></message-spool></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      with_nested: "{{ VMRs_CORE.NAMEs }}"
+
+
+    - uri:
+         url:              "http://{{ item }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/7_1_1'><message-spool><vpn-name>default</vpn-name><queue><name>CoreQueue</name><permission><all/><delete/></permission></queue></message-spool></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      with_nested: "{{ VMRs_CORE.NAMEs }}"
+
+
+    - uri:
+         url:              "http://{{ item }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/7_1_1'><message-spool><vpn-name>default</vpn-name><queue><name>CoreQueue</name><subscription><topic>'in/*/QoS1/>'</topic></subscription></queue></message-spool></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      with_nested:  "{{ VMRs_CORE.NAMEs }}"
+ 
+
+    - uri:
+         url:              "http://{{ item }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/7_1_1'><message-spool><vpn-name>default</vpn-name><queue><name>CoreQueue</name><no><shutdown><full/></shutdown></no></queue></message-spool></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      with_nested: "{{ VMRs_CORE.NAMEs }}"

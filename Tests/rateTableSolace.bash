@@ -1,34 +1,31 @@
-
-
-SIZES='100 500 1024 2048 4096 10240 20480'
+#SIZES='100 500 1024 2048 4096 10240 20480'
+SIZES='100 500 1024 2048'
 
 case "${TEST_TYPE}" in
 
 #Solace IoT Tests
 #=================
 solaceDirectIoT10)
-	SDKPERF_HOME=~/test_env/Sdkperf
-	STREAM_COUNT=10
-	SDKPERF_JAVA=sol-sdkperf/sdkperf_jms.sh
-	SDKPERF_MQTT=sdkperf-mqtt/sdkperf_mqtt.sh
-	rate[100]=650000
-	rate[500]=450000
-	rate[1024]=450000
-	rate[2048]=330000
-	rate[4096]=160000
-	;;
+        SDKPERF_HOME=~/test_env/Sdkperf
+        STREAM_COUNT=10
+        SDKPERF_JAVA=sol-sdkperf/sdkperf_java.sh
+        SDKPERF_MQTT=sdkperf-mqtt/sdkperf_mqtt.sh
+        rate[100]=1000
+        rate[500]=1000
+        rate[1024]=1000
+        rate[2048]=1000
+        ;;
 
 solaceDirectIoT100)
-	SDKPERF_HOME=~/test_env/Sdkperf
-	STREAM_COUNT=100
-	SDKPERF_JAVA=sol-sdkperf/sdkperf_jms.sh
-	SDKPERF_MQTT=sdkperf-mqtt/sdkperf_mqtt.sh
-	rate[100]=650000
-	rate[500]=450000
-	rate[1024]=450000
-	rate[2048]=330000
-	rate[4096]=160000
-	;;
+        SDKPERF_HOME=~/test_env/Sdkperf
+        STREAM_COUNT=100
+        SDKPERF_JAVA=sol-sdkperf/sdkperf_java.sh
+        SDKPERF_MQTT=sdkperf-mqtt/sdkperf_mqtt.sh
+        rate[100]=100
+        rate[500]=100
+        rate[1024]=100
+        rate[2048]=100
+        ;;
 
 #Solace JCSMP Tests
 #=================

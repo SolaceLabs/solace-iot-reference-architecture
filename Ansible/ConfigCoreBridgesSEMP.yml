@@ -48,7 +48,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/7_1_1'><bridge><bridge-name>C2E-{{ item[1] }}</bridge-name><vpn-name>default</vpn-name><remote><subscription-topic><topic>svc/></topic></subscription-topic></remote></bridge></rpc>"
+         body:             "<rpc semp-version='soltr/7_1_1'><bridge><bridge-name>C2E-{{ item[1] }}</bridge-name><vpn-name>default</vpn-name><remote><subscription-topic><topic>in/*/QoS1/></topic></subscription-topic></remote></bridge></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
@@ -77,6 +77,20 @@
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
          body:             "<rpc semp-version='soltr/7_1_1\'><bridge><bridge-name>C2E-{{ item[1] }}</bridge-name><vpn-name>default</vpn-name><remote><create><message-vpn><vpn-name>default</vpn-name><router/><virtual-router-name>v:{{ item[1] }}</virtual-router-name></message-vpn></create></remote></bridge></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      with_nested:
+       - "{{ VMRs_CORE.NAMEs }}"
+       - "{{ VMRs_EDGE.NAMEs }}"
+
+    - uri:
+         url:              "http://{{ item[0] }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/7_1_1\'><bridge><bridge-name>C2E-{{ item[1] }}</bridge-name><vpn-name>default</vpn-name><remote><message-vpn><vpn-name>default</vpn-name><router/><virtual-router-name>v:{{ item[1] }}</virtual-router-name><message-spool><queue><name>E2CQueue</name></queue></message-spool></message-vpn></remote></bridge></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
