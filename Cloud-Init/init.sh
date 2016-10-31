@@ -40,28 +40,6 @@ export MAC=`wget -q -O - http://instance-data/latest/meta-data/network/interface
 export AWS_SUBNET_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}subnet-id`
 export AWS_VPC_ID=`wget -q -O - http://instance-data/latest/meta-data/network/interfaces/macs/${MAC}vpc-id`
 
-# Constants
-export ANSIBLE_ADMIN_NAME=admin
-export ANSIBLE_ADMIN_PORT=8080
-export VMR_ADMIN_NAME=sysadmin
-export VMR_ADMIN_PORT=2222
-export HTTP=80
-export HTTPS=443
-export SEMP=8080
-export SEMPS=943
-export SSH_DOCKER=22
-export SSH_BASE=2222
-export MQTT=1883
-export MQTTS=8883
-export MQTTWS=8000
-export MQTTWSS=8443
-export REST=9000
-export RESTS=9443
-export SMF=55555
-export SMFC=55003
-export SMFS=55443
-
-
 if [ ${VMR_CORE_CLUSTER} == "Y" ]; then
    core_count=3
 else
@@ -81,7 +59,8 @@ echo "`date` Upgrade Ubuntu 14.04 to latests libraries"
 sudo apt-get update
 sudo apt-get -y upgrade
 
-echo "`date` Grab Ansible, git ..."
+echo "`date` Grab Ansible, git etc..."
+sudo apt-get -y install bc
 sudo apt-get -y install git
 sudo apt-get -y install ansible
 sudo apt-get -y install python-pip
@@ -102,6 +81,7 @@ echo "`date` Download tests"
 ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
 chmod 744 /home/ubuntu/test_env/Tests/*sh
 
+source /home/ubuntu/test_env/Cloud-Init/setEnvironment.bash
 
 # Setup Security
 #################
@@ -291,7 +271,7 @@ fi
 # Add aditional tooling
 #######################
 # Inject sdkperf_java into test environment
-sudo apt-get -y install openjdk-7-jre-headless
+sudo apt-get -y install openjdk-8-jre-headless
 sudo apt-get -y install unzip
 mkdir /home/ubuntu/test_env/Sdkperf
 cd /home/ubuntu/test_env/Sdkperf

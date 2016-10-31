@@ -11,7 +11,7 @@
          status_code:      200
          body_format:      raw
          return_content:   yes
-      with: "{{ VMRs_EDGE.NAMEs }}"
+      with_items: "{{ VMRs_EDGE.NAMEs }}"
 
 
     - uri:
@@ -24,7 +24,7 @@
          status_code:      200
          body_format:      raw
          return_content:   yes
-      with: "{{ VMRs_EDGE.NAMEs }}"
+      with_items: "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -36,7 +36,7 @@
          status_code:      200
          body_format:      raw
          return_content:   yes
-      with: "{{ VMRs_EDGE.NAMEs }}"
+      with_items: "{{ VMRs_EDGE.NAMEs }}"
 
     - uri:
          url:              "http://{{ item }}:{{ ANSIBLE_SEMP_PORT }}/SEMP"
@@ -48,4 +48,4 @@
          status_code:      200
          body_format:      raw
          return_content:   yes
-      with_nested: "{{ VMRs_EDGE.NAMEs }}"
+      with_items: "{{ VMRs_EDGE.NAMEs }}"

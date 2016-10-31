@@ -24,7 +24,7 @@ echo ""
 echo "${1} Byte size test - ${2} Msg/sec for ${3} seconds"
 date +%F-%T
 
-${SDKPERF_HOME}/${SDKPERF_JAVA} -cip=${SOLACE_CORE} -q -cc=${STREAM_COUNT} -jcf=cf \
+${SDKPERF_HOME}/${SDKPERF_JAVA} -cip=${SOLACE_CORE} -q  -jcf=cf \
  -stl=${topicList} -sri=100 -cor |  grep -E '^Total.*rec|^Computed subscriber rate' > /tmp/sdkperf &
 
 sleep 5
@@ -47,3 +47,4 @@ do
   evaluateResults $msgNum ${rate[${size}]}
 done
 date +%F-%T
+

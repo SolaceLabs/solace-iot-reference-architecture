@@ -48,3 +48,4 @@ do
   evaluateResults $msgNum ${rate[${size}]}
 done
 date +%F-%T
+

@@ -13,7 +13,6 @@ fi
 . "./utils.bash"
 . "./rateTableSolace.bash"
 
-
 runSdkPerf ()
 {
 # Arguments are msgSize msgRate runSeconds
@@ -25,13 +24,13 @@ echo ""
 echo "${1} Byte size test - ${2} Msg/sec for ${3} seconds"
 date +%F-%T
 
-${SDKPERF_HOME}/${SDKPERF_JAVA} -cip=${SOLACE_CORE} -q -cc=${STREAM_COUNT} -jcf=cf \
- -stl=${topicList} -sri=100 -cor |  grep -E '^Total.*rec|^Computed subscriber rate' > /tmp/sdkperf &
+${SDKPERF_HOME}/${SDKPERF_JAVA} -cip=${SOLACE_CORE} -q  -jcf=cf \
+ -sql="CoreQueue" -sri=100 -cor |  grep -E '^Total.*rec|^Computed subscriber rate' > /tmp/sdkperf &
 
 sleep 5
 
 resultPub=`${SDKPERF_HOME}/${SDKPERF_MQTT} -cip=${SOLACE_EDGE} -cc=${STREAM_COUNT} -q \
- -ptl=${topicList} -mpq=1 -msa=${1} -mr=${msgRate} -mn=${msgNum} -mrt=max\
+ -ptl=${topicList} -mpq=0 -msa=${1} -mr=${msgRate} -mn=${msgNum} -mrt=max\
  | grep -E '^Total.*tran|^Computed.pub'`
 
 killall -TERM java
@@ -48,3 +47,4 @@ do
   evaluateResults $msgNum ${rate[${size}]}
 done
 date +%F-%T
+

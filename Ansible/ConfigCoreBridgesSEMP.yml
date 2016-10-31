@@ -48,7 +48,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/7_1_1'><bridge><bridge-name>C2E-{{ item[1] }}</bridge-name><vpn-name>default</vpn-name><remote><subscription-topic><topic>in/*/QoS1/></topic></subscription-topic></remote></bridge></rpc>"
+         body:             "<rpc semp-version='soltr/7_1_1'><bridge><bridge-name>C2E-{{ item[1] }}</bridge-name><vpn-name>default</vpn-name><remote><subscription-topic><topic>in/*/QoS0/></topic></subscription-topic></remote></bridge></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
