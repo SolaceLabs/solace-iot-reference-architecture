@@ -81,213 +81,25 @@ echo "`date` Download tests"
 ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
 chmod 744 /home/ubuntu/test_env/Tests/*sh
 
+# Setup Enviroemental variables
+##################################
 source /home/ubuntu/test_env/Cloud-Init/setEnvironment.bash
 
 # Setup Security
 #################
+source /home/ubuntu/test_env/Cloud-Init/setSecurity.bash
 
-echo "`date` Place private key on test hosts"
-echo "-----BEGIN RSA PRIVATE KEY-----" > /home/ubuntu/${AWS_KEY_NAME}.pem
-echo ${AWS_KEY_VALUE} | tr " " "\n" >> /home/ubuntu/${AWS_KEY_NAME}.pem
-echo "-----END RSA PRIVATE KEY-----" >> /home/ubuntu/${AWS_KEY_NAME}.pem
-chmod 600  /home/ubuntu/${AWS_KEY_NAME}.pem
+# Create VMRs
+#############
+source /home/ubuntu/test_env/Cloud-Init/createVMRs.bash
 
-echo "`date` Set up Security policy group of one is not provided"
-cd /home/ubuntu/test_env/Ansible
-echo "[LOCALHOST]" > ./hosts
-echo "localhost" >> ./hosts
-if [ ${AWS_GROUP_ID} == "CREATE" ]; then
-   # Need to set up to use aws console
-   ### WARNING SCRIPT ERROR IN THIS CODE BLOCK WILL LEAK SECURITY CREDENTIALS ###
-   ansible-playbook -i ./hosts -c local EnableAWS.yml -v
-   AWS_SG_NAME="IOT-SG-`date | md5sum | head -c 5`"
-   sg_json=`aws ec2 create-security-group --group-name ${AWS_SG_NAME} --description "VMR Security group for IOT message traffic"`
-   AWS_GROUP_ID=`echo $sg_json | jq -r '.GroupId'`
-   #HTTP
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${HTTP} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${HTTPS} --cidr 0.0.0.0/0
-   #SEMP   
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SEMP} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SEMPS} --cidr 0.0.0.0/0
-   #SSH
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SSH_DOCKER} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SSH_BASE} --cidr 0.0.0.0/0
-   #MQTT
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${MQTT} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${MQTTS} --cidr 0.0.0.0/0
-   #MQTT/WS
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${MQTTWS} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${MQTTWSS} --cidr 0.0.0.0/0   
-   #REST
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${REST} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${RESTS} --cidr 0.0.0.0/0    
-   #SMF
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SMF} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SMFC} --cidr 0.0.0.0/0
-   aws ec2 authorize-security-group-ingress --group-id  ${AWS_GROUP_ID} --protocol tcp --port ${SMFS} --cidr 0.0.0.0/0
-   ansible-playbook -i ./hosts -c local DisableAWS.yml -v
-   ### END CODE BLOCK ###
-fi
+# Create VMRs
+#############
+source /home/ubuntu/test_env/Cloud-Init/configVMRs.bash
 
-# Create and Configure VMRs
-############################
-echo "`date` Create a VMRs"
-cd /home/ubuntu/test_env/Ansible
-ansiblePasswd=`date | md5sum | head -c 32`
-sed -i '/passwd/s/=PASSWORD/='${ansiblePasswd}'/' ./vmr_cloudInit.sh
-mkdir ./group_vars
-mkdir ./library
-mkdir ./instances
-echo "---" > ./instances/A_VMR_HEADER.yml
-echo "Instances:" >> ./instances/A_VMR_HEADER.yml
-cp /etc/ansible/roles/cmprescott.xml/library/xml ./library
-LOCALHOST_VAR_FILE="./group_vars/LOCALHOST/localhost.yml"
-mkdir ./group_vars/LOCALHOST
-VMRs_VAR_FILE="./group_vars/VMRs/VMRs.yml"
-mkdir ./group_vars/VMRs
-echo "[LOCALHOST]" > ./hosts
-echo "localhost" >> ./hosts
-ansible-playbook -i ./hosts -c local CreateVMR_AWS.yml -v
-
-#Re-asemble config fragments from created instances
-ansible localhost -m assemble -a "src=./instances dest=./VMRs.yml"
-
-echo "---" > ${LOCALHOST_VAR_FILE}
-vmr_core_name="["
-vmr_core_IP="["
-vmr_core_ID="["
-vmr_edge_name="["
-vmr_edge_IP="["
-vmr_edge_ID="["
-echo ""       >> ./hosts
-echo "[VMRs]" >> ./hosts
-echo "---" > ${VMRs_VAR_FILE}
-echo "ANSIBLE_USERNAME: ${ANSIBLE_ADMIN_NAME}"  >> ${LOCALHOST_VAR_FILE}
-echo "ANSIBLE_PASSWORD: ${ansiblePasswd}"       >> ${LOCALHOST_VAR_FILE}
-echo "ANSIBLE_SEMP_PORT: ${ANSIBLE_ADMIN_PORT}" >> ${LOCALHOST_VAR_FILE}
-echo "ANSIBLE_USERNAME: ${ANSIBLE_ADMIN_NAME}"  >> ${VMRs_VAR_FILE}
-echo "ANSIBLE_PASSWORD: ${ansiblePasswd}"       >> ${VMRs_VAR_FILE}
-echo "[VMRs:children]" >> ./hosts
-echo "VMRs_CORE"       >> ./hosts
-echo "VMRs_EDGE"       >> ./hosts
-echo ""                >> ./hosts
-echo "[VMRs_CORE]"     >> ./hosts
-
-count=0
-core="true"
-instanceCount=`grep -c Instance: VMRs.yml`
-for (( index=0; index<$instanceCount; index++ )); do
-   vmr_name=`cat ./VMRs.yml | shyaml get-value Instances.${index}.Instance.PRIVATE_DNS`
-   vmr_ip=`cat ./VMRs.yml   | shyaml get-value Instances.${index}.Instance.PRIVATE_IP`
-   vmr_id=`cat ./VMRs.yml   | shyaml get-value Instances.${index}.Instance.ID`
-   vmr_name=${vmr_name%.ec2.internal}  
-   if [ ${count} == ${core_count} ]; then
-      echo "" >> ./hosts
-      echo "[VMRs_EDGE]" >> ./hosts
-      core="false"
-   fi
-   echo "${vmr_ip} ansible_port=${VMR_ADMIN_PORT} ansible_user=${VMR_ADMIN_NAME} ansible_ssh_private_key_file=/home/ubuntu/${AWS_KEY_NAME}.pem" >> ./hosts
-   if [ ${core} == "true" ]; then
-      vmr_core_name="${vmr_core_name} ${vmr_name}," 
-      vmr_core_IP="${vmr_core_IP} ${vmr_ip}," 
-      vmr_core_ID="${vmr_core_ID} ${vmr_id}," 
-   else
-      vmr_edge_name="${vmr_edge_name} ${vmr_name}," 
-      vmr_edge_IP="${vmr_edge_IP} ${vmr_ip}," 
-      vmr_edge_ID="${vmr_edge_ID} ${vmr_id}," 
-   fi
-   count=$((count+1))
-done
-
-echo "VMRs_CORE:" >> ${LOCALHOST_VAR_FILE}
-echo "   NAMEs: ${vmr_core_name%,}]" >> ${LOCALHOST_VAR_FILE}
-echo "   IPs: ${vmr_core_IP%,}]"     >> ${LOCALHOST_VAR_FILE}
-echo "   IDs: ${vmr_core_ID%,}]"     >> ${LOCALHOST_VAR_FILE}
-echo "VMRs_EDGE:" >> ${LOCALHOST_VAR_FILE}
-echo "   NAMEs: ${vmr_edge_name%,}]" >> ${LOCALHOST_VAR_FILE}
-echo "   IPs: ${vmr_edge_IP%,}]"     >> ${LOCALHOST_VAR_FILE}
-echo "   IDs: ${vmr_edge_ID%,}]"     >> ${LOCALHOST_VAR_FILE}
-
-#[TODO] Hack to let VMRs come update
-echo "`date` Configure VMRs - Waiting for VMRs to come up"
-unreachable=1
-while [ ${unreachable} -ne 0 ] ; do 
-   pingResult=`ansible -i ./hosts -m ping VMRs`
-   unreachable=`echo ${pingResult} | grep -c UNREACHABLE`
-   echo "Unreachable VMRs 1=TRUE 0=FALSE:  Value:${unreachable}" 
-done
-
-# Now the base OS is up lets wait until SolOS is responsive to SEMP
-ansible-playbook -i ./hosts -c local VerifyAliveSEMP.yml -v
-
-echo "`date` Configure VMRs - Configure Edge Queues"
-ansible-playbook -i ./hosts -c local ConfigEdgeQueuesSEMP.yml -v
-
-echo "`date` Configure VMRs - Configure Core Queue"
-ansible-playbook -i ./hosts -c local ConfigCoreQueueSEMP.yml -v
-
-echo "`date` Configure VMRs - Configure Edge Bridges"
-ansible-playbook -i ./hosts -c local ConfigEdgeBridgesSEMP.yml -v
-
-echo "`date` Configure VMRs - Configure Core Bridges"
-ansible-playbook -i ./hosts -c local ConfigCoreBridgesSEMP.yml -v
-
-if [ ${AWS_ELB} != "N" ]; then
-   # Need to set up to use aws console
-   ### WARNING SCRIPT ERROR IN THIS CODE BLOCK WILL LEAK SECURITY CREDENTIALS
-   ansible-playbook -i ./hosts -c local EnableAWS.yml -v
-   if [ ${AWS_ELB} == "Y" ]; then
-      AWS_ELB="IOT-LB-`date | md5sum | head -c 5`"
-
-      lb_out=`aws elb create-load-balancer --load-balancer-name ${AWS_ELB} --listeners "[
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTT}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTT}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTTS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTTS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTTWS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTTWS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${MQTTWSS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${MQTTWSS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${REST}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${REST}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${RESTS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${RESTS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${HTTP}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${HTTP}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${HTTPS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${HTTPS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SEMP}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SEMP}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SEMPS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SEMPS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SMF}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SMF}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SMFS}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SMFS}},
-             {\"Protocol\": \"TCP\", \"LoadBalancerPort\": ${SMFC}, \"InstanceProtocol\": \"TCP\", \"InstancePort\": ${SMFC}}
-             ]"\
-          --subnets ${AWS_SUBNET_ID}\
-          --security-groups ${AWS_GROUP_ID}`
-
-   fi
-   aws elb register-instances-with-load-balancer --load-balancer-name ${AWS_ELB} --instances `echo ${vmr_edge_ID} | tr -d "[,]"`
-   aws elb configure-health-check --load-balancer-name ${AWS_ELB} --health-check "Target=TCP:${SMF},Interval=5,UnhealthyThreshold=3,HealthyThreshold=2,Timeout=2"
-   ansible-playbook -i ./hosts -c local DisableAWS.yml -v
-   ### END CODE BLOCK
-
-   echo "" >> ./hosts # Now add the LB into the hosts file for documentation
-   echo "[LOAD_BALANCER]" >> ./hosts
-   echo `echo $lb_out | jq -r '.DNSName'` >> ./hosts
-fi
-
-# Add aditional tooling
-#######################
-# Inject sdkperf_java into test environment
-sudo apt-get -y install openjdk-8-jre-headless
-sudo apt-get -y install unzip
-mkdir /home/ubuntu/test_env/Sdkperf
-cd /home/ubuntu/test_env/Sdkperf
-wget https://sftp.solace.com/download/SDKPERF_JAVA
-wget https://sftp.solace.com/download/SDKPERF_MQTT
-mv SDKPERF_JAVA ./sdkperf_java.zip
-mv SDKPERF_MQTT ./sdkperf_mqtt.zip
-unzip \*.zip
-ln -s sdkperf-mqtt-* sdkperf-mqtt
-ln -s sol-sdkperf-* sol-sdkperf
-chmod 755 /home/ubuntu/test_env/Sdkperf/*/*sh
-
-# Get a copy of iperf that will run on VMR
-sudo apt-get -y install iperf
-cd /home/ubuntu
-wget https://iperf.fr/download/fedora/iperf-2.0.5-13.fc21.x86_64.rpm
+# Settup test environment
+##########################
+source /home/ubuntu/test_env/Cloud-Init/setTestEnv.bash
 
 # Cleanup and exit
 ###################
