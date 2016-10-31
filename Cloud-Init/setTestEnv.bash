@@ -15,7 +15,7 @@ ln -s sol-sdkperf-* sol-sdkperf
 chmod 755 /home/ubuntu/test_env/Sdkperf/*/*sh
 
 mkdir /home/ubuntu/test_env/MQTT_Example
-ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env/MQTT_Example"
+ansible localhost -m git -a "repo=https://github.com/SolaceSamples/solace-samples-mqtt dest=/home/ubuntu/test_env/MQTT_Example"
 
 # Get a copy of iperf that will run on VMR
 sudo apt-get -y install iperf
