@@ -15,10 +15,19 @@ RESET=`tput sgr0`
 
 generateTopicList()
 {
-  topicList=${TOPIC_PREFIX}1
+  topicList=${TOPIC_PREFIX}1${TOPIC_POSTFIX}
   for i in `seq 2 ${1}`
   do
-    topicList="${topicList},${TOPIC_PREFIX}${i}"
+    topicList="${topicList},${TOPIC_PREFIX}${i}${TOPIC_POSTFIX}"
+  done
+}
+
+generateReplyList()
+{
+  replyList=${REPLY_PREFIX}1${REPLY_POSTFIX}
+  for i in `seq 2 ${1}`
+  do
+    replyList="${replyList},${REPLY_PREFIX}${i}${REPLY_POSTFIX}"
   done
 }
 
