@@ -13,7 +13,7 @@
          return_content:   yes
       register: rpc_reply
       until: rpc_reply.content != ""
-      retries: 30
+      retries: 60
       delay: 10
       with_items:
         - "{{ VMRs_EDGE.NAMEs }}"

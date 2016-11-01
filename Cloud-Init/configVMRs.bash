@@ -1,11 +1,5 @@
 #[TODO] Hack to let VMRs come update
 echo "`date` Configure VMRs - Waiting for VMRs to come up"
-unreachable=1
-while [ ${unreachable} -ne 0 ] ; do 
-   pingResult=`ansible -i ./hosts -m ping VMRs`
-   unreachable=`echo ${pingResult} | grep -c UNREACHABLE`
-   echo "Unreachable VMRs 1=TRUE 0=FALSE:  Value:${unreachable}" 
-done
 
 # Now the base OS is up lets wait until SolOS is responsive to SEMP
 ansible-playbook -i ./hosts -c local VerifyAliveSEMP.yml -v
