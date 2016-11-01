@@ -78,7 +78,7 @@ sudo pip install lxml               # Ansible xml parsing, SEMP responses
 sudo ansible-galaxy install cmprescott.xml
 
 echo "`date` Download tests"
-ansible localhost -m git -a "repo=https://github.com/KenBarr/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
+ansible localhost -m git -a "repo=https://github.com/SolaceLabs/Solace_testing_in_AWS dest=/home/ubuntu/test_env"
 chmod 744 /home/ubuntu/test_env/Tests/*sh
 
 # Setup Enviroemental variables
