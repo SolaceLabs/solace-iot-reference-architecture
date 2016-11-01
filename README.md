@@ -6,7 +6,7 @@ of tests to validate the infrastructure and demonstrate Solace messaging functio
 
 ## Documentation
 
-Please read [Documentation](https://kenbarr.github.io/Solace_testing_in_AWS/) for complete documentation for description of test infrastructure, 
+Please read [Documentation](https://SolaceLabs.github.io/Solace_testing_in_AWS/) for complete documentation for description of test infrastructure, 
 as well as how to install and run tests.
 
 ## Contributing
