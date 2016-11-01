@@ -59,14 +59,18 @@ export AWS_KEY_VALUE=XXX           #<actual content of private key>
 
 ## Optionally you can edit these variables to modify VMRs and cluster
 
-```
 ## VMR perticulars
+
+```
 export AWS_GROUP_ID=CREATE            #<CREATE will create new policy or provide your security Policy ID>
 export AWS_INSTANCE_TYPE=t2.medium    #<t2.medium will be minimum requirement, its not free>
 export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS console>
 export AWS_INSTANCE_AMI=ami-3fa7d528  #Latest released 7.2 Eval
+```
 
 ## Change to define netwoork
+
+```
 export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, DO NOT SET TO Y>
 export VMR_EDGE_NODES=1   # <[0...MAX_BRIDGE] # of edge VMRs, 0 means core only>
 export AWS_ELB=N          #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BALANCER, there create new or use existing ELB_NAME>
@@ -103,21 +107,46 @@ To troubleshoot and monitor progress of startup:
 
 # Test procedures
 
-To see the IP/DNS of the core appliances and Elastic LoadBalancer, please see ~/test_env/Ansible/hosts
+To see the IP/DNS of the core appliances and Elastic LoadBalancer, please see ~/test_env/Ansible/hosts and VMRs.yml
+
+```
+CORE=`cat ~/test_env/Ansible/VMRs.yml | shyaml get-value Instances.0.Instance.PRIVATE_DNS`
+EDGE=`tail -n 1 ~/test_env/Ansible/hosts`
+cd ~/test
+```
 
 ## Test QoS0 traffic from multiple edge devices into core server
 
-This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing to core applications.
+This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing Q0S0 to core applications.
 Edge MQTT devices publish to in/<deviceId>/QoS0/DATADESCRIPTION
+
+```
 export TOPIC_PREFIX=in/
 export TOPC_POSTFIX=QoS0/DATADESCRIPTION
-~/test_env/Tests/sol_QoS0_IoT_E2C.sh <runTime> <SolaceCoreHost> <SolaceEdgeHost> solaceDirectIoT10
-
+~/test_env/Tests/sol_QoS0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+```
 
 ## Test QoS1 traffic from multiple edge device into core server
 
-This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing to core applications.
+This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing QoS1 to core applications.
 Edge MQTT devices publish to in/<deviceId>/QoS1/DATADESCRIPTION
+
+```
 export TOPIC_PREFIX=in/
 export TOPC_POSTFIX=QoS1/DATADESCRIPTION
-~/test_env/Tests/sol_QoS1_IoT_E2C.sh <runTime> <SolaceCoreHost> <SolaceEdgeHost> solaceDirectIoT10
+~/test_env/Tests/sol_QoS1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+```
+
+## Test Request message coming from load balanced edge devices into core appliations.
+
+This traffic pattern shows multiple devices connected across load balanced edge VMRs sending requests to core applications.
+Edge MQTT devices publish request to in/<deviceId>/QoS0/request/desc
+Core Java devices publish reply to out/<deviceId>/direct/reply/desc
+
+```
+export TOPIC_PREFIX=in/
+export TOPIC_POSTFIX=/QoS0/request/desc
+export REPLY_PREFIX=out/
+export TOPIC_POSTFIX=/direct/reply/desc
+~/test_env/Tests/sol_ReqRep_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+```

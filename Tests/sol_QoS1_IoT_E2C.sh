@@ -30,7 +30,7 @@ ${SDKPERF_HOME}/${SDKPERF_JAVA} -cip=${SOLACE_CORE} -q  -jcf=cf \
 sleep 5
 
 resultPub=`${SDKPERF_HOME}/${SDKPERF_MQTT} -cip=${SOLACE_EDGE} -cc=${STREAM_COUNT} -q \
- -ptl=${topicList} -mpq=0 -msa=${1} -mr=${msgRate} -mn=${msgNum} -mrt=max\
+ -ptl=${topicList} -mpq=1 -msa=${1} -mr=${msgRate} -mn=${msgNum} -mrt=max\
  | grep -E '^Total.*tran|^Computed.pub'`
 
 killall -TERM java
