@@ -1,7 +1,7 @@
 # Testing Solace in AWS
 ## Overview
 
-This project provides an easy to understand set of steps to bring up a Solace meassaging IoT infrastructure in AWS as well as provides a basic set 
+This project provides an easy to understand set of steps to bring up a Solace messaging IoT infrastructure in AWS as well as provides a basic set 
 of tests to validate the infrastructure and demonstrate Solace messaging functionality in AWS.
 
 ## Documentation
