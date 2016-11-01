@@ -9,7 +9,7 @@ The IoT reference architecture itself is evolving along with the features/functi
 
 ## Applicability
 This architecture is presently best suited for use cases where there is a large amount of messages towards the core connected services, but few messages downbound to devices.  Request/replay in both directions is supported.
-Also MQTT QoS1 downbound towards devices is not supported.
+Also MQTT svc1 downbound towards devices is not supported.
 
 ## Future architecture:
 ![]({{ site.baseurl }}/images/IoTArchFuture.png)
@@ -115,37 +115,37 @@ EDGE=`tail -n 1 ~/test_env/Ansible/hosts`
 cd ~/test
 ```
 
-## Test QoS0 traffic from multiple edge devices into core server
+## Test svc0 traffic from multiple edge devices into core server
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing Q0S0 to core applications.
-Edge MQTT devices publish to in/<deviceId>/QoS0/DATADESCRIPTION
+Edge MQTT devices publish to in/<deviceId>/svc0/DATADESCRIPTION
 
 ```
 export TOPIC_PREFIX=in/
-export TOPC_POSTFIX=QoS0/DATADESCRIPTION
-~/test_env/Tests/sol_QoS0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+export TOPC_POSTFIX=svc0/DATADESCRIPTION
+~/test_env/Tests/sol_svc0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
-## Test QoS1 traffic from multiple edge device into core server
+## Test svc1 traffic from multiple edge device into core server
 
-This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing QoS1 to core applications.
-Edge MQTT devices publish to in/<deviceId>/QoS1/DATADESCRIPTION
+This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing svc1 to core applications.
+Edge MQTT devices publish to in/<deviceId>/svc1/DATADESCRIPTION
 
 ```
 export TOPIC_PREFIX=in/
-export TOPC_POSTFIX=QoS1/DATADESCRIPTION
-~/test_env/Tests/sol_QoS1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+export TOPC_POSTFIX=svc1/DATADESCRIPTION
+~/test_env/Tests/sol_svc1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
 ## Test Request message coming from load balanced edge devices into core appliations.
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs sending requests to core applications.
-Edge MQTT devices publish request to in/<deviceId>/QoS0/request/desc
+Edge MQTT devices publish request to in/<deviceId>/svc0/request/desc
 Core Java devices publish reply to out/<deviceId>/direct/reply/desc
 
 ```
 export TOPIC_PREFIX=in/
-export TOPIC_POSTFIX=/QoS0/request/desc
+export TOPIC_POSTFIX=/svc0/request/desc
 export REPLY_PREFIX=out/
 export TOPIC_POSTFIX=/direct/reply/desc
 ~/test_env/Tests/sol_ReqRep_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
