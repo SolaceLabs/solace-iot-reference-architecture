@@ -9,7 +9,7 @@ The IoT reference architecture itself is evolving along with the features/functi
 
 ## Applicability
 This architecture is presently best suited for use cases where there is a large amount of messages towards the core connected services, but few messages downbound to devices.  Request/replay in both directions is supported.
-Also MQTT svc1 downbound towards devices is not supported.
+Also MQTT QoS1 downbound towards devices is not supported.
 
 ## Future architecture:
 ![]({{ site.baseurl }}/images/IoTArchFuture.png)
