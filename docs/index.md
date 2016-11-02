@@ -112,7 +112,7 @@ To see the IP/DNS of the core appliances and Elastic LoadBalancer, please see ~/
 ```
 CORE=`cat ~/test_env/Ansible/VMRs.yml | shyaml get-value Instances.0.Instance.PRIVATE_DNS`
 EDGE=`tail -n 1 ~/test_env/Ansible/hosts`
-cd ~/test_env
+cd ~/test_env/Tests
 ```
 
 ## Test QoS0 traffic from multiple edge devices into core server
@@ -137,6 +137,18 @@ Edge MQTT devices publish to in/"deviceId"/svc1/DATADESCRIPTION
 export TOPIC_PREFIX=in/
 export TOPIC_POSTFIX=/svc1/DATADESCRIPTION
 ~/test_env/Tests/sol_QoS1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+```
+
+## Test direct traffic from core server out to edge devices
+
+This traffic pattern shows core servers publishing out to multiple devices connected across load balanced edge VMRs.
+
+Edge Core servers publish to out/"deviceId"/DATADESCRIPTION
+
+```
+export TOPIC_PREFIX=out/
+export TOPIC_POSTFIX=/DATADESCRIPTION
+~/test_env/Tests/sol_direct_IoT_C2E.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
 ## Test Request message coming from load balanced edge devices into core appliations.
