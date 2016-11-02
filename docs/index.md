@@ -115,7 +115,7 @@ EDGE=`tail -n 1 ~/test_env/Ansible/hosts`
 cd ~/test_env
 ```
 
-## Test svc0 traffic from multiple edge devices into core server
+## Test QoS0 traffic from multiple edge devices into core server
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing Q0S0 to core applications.
 
@@ -127,7 +127,7 @@ export TOPIC_POSTFIX=/svc0/DATADESCRIPTION
 ~/test_env/Tests/sol_QoS0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
-## Test svc1 traffic from multiple edge device into core server
+## Test QoS1 traffic from multiple edge device into core server
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing svc1 to core applications.
 
