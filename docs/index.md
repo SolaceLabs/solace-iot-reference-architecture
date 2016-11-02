@@ -118,35 +118,40 @@ cd ~/test
 ## Test svc0 traffic from multiple edge devices into core server
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing Q0S0 to core applications.
-Edge MQTT devices publish to in/<deviceId>/svc0/DATADESCRIPTION
+
+Edge MQTT devices publish to in/"deviceId"/svc0/DATADESCRIPTION
 
 ```
 export TOPIC_PREFIX=in/
-export TOPC_POSTFIX=svc0/DATADESCRIPTION
-~/test_env/Tests/sol_svc0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+export TOPIC_POSTFIX=/svc0/DATADESCRIPTION
+~/test_env/Tests/sol_QoS0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
 ## Test svc1 traffic from multiple edge device into core server
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing svc1 to core applications.
-Edge MQTT devices publish to in/<deviceId>/svc1/DATADESCRIPTION
+
+Edge MQTT devices publish to in/"deviceId"/svc1/DATADESCRIPTION
 
 ```
 export TOPIC_PREFIX=in/
-export TOPC_POSTFIX=svc1/DATADESCRIPTION
-~/test_env/Tests/sol_svc1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
+export TOPIC_POSTFIX=/svc1/DATADESCRIPTION
+~/test_env/Tests/sol_QoS1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
 ## Test Request message coming from load balanced edge devices into core appliations.
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs sending requests to core applications.
-Edge MQTT devices publish request to in/<deviceId>/svc0/request/desc
-Core Java devices publish reply to out/<deviceId>/direct/reply/desc
+
+Edge MQTT devices publish request to in/"deviceId"/svc0/request/desc
+
+Core Java devices publish reply to out/"deviceId"/svc0/reply/desc
+
 
 ```
 export TOPIC_PREFIX=in/
 export TOPIC_POSTFIX=/svc0/request/desc
 export REPLY_PREFIX=out/
-export TOPIC_POSTFIX=/direct/reply/desc
+export TOPIC_POSTFIX=/svc0/reply/desc
 ~/test_env/Tests/sol_ReqRep_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
