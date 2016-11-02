@@ -115,7 +115,7 @@ EDGE=`tail -n 1 ~/test_env/Ansible/hosts`
 cd ~/test_env/Tests
 ```
 
-## Test QoS0 traffic from multiple edge devices into core server
+## Test QoS0 traffic from multiple edge devices into core server - Device initiated Pub/Sub
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing Q0S0 to core applications.
 
@@ -127,7 +127,7 @@ export TOPIC_POSTFIX=/svc0/DATADESCRIPTION
 ~/test_env/Tests/sol_QoS0_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
-## Test QoS1 traffic from multiple edge device into core server
+## Test QoS1 traffic from multiple edge device into core server - Device initiated Pub/Sub
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs publishing svc1 to core applications.
 
@@ -139,7 +139,7 @@ export TOPIC_POSTFIX=/svc1/DATADESCRIPTION
 ~/test_env/Tests/sol_QoS1_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
-## Test direct traffic from core server out to edge devices
+## Test direct traffic from core server out to edge devices - Cloud app-initiated Pub/Sub
 
 This traffic pattern shows core servers publishing out to multiple devices connected across load balanced edge VMRs.
 
@@ -151,7 +151,7 @@ export TOPIC_POSTFIX=/DATADESCRIPTION
 ~/test_env/Tests/sol_direct_IoT_C2E.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
-## Test Request message coming from load balanced edge devices into core appliations.
+## Test Request message from load balanced edge devices into core appliations. - Device initiated request/reply
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs sending requests to core applications.
 
@@ -167,3 +167,4 @@ export REPLY_PREFIX=out/
 export TOPIC_POSTFIX=/svc0/reply/desc
 ~/test_env/Tests/sol_ReqRep_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
+## Test Request message from core appliations to load balanced edge devices. - Cloud app initiated request/reply
