@@ -31,7 +31,7 @@ Also MQTT svc1 downbound towards devices is not supported.
 5.	~~Fault tolerant~~ and efficient load balancers
 6.	Properly configured firewalls ~~and TLS security~~
 
-Creation of this reference architecture is fully automated with minimal manual configuration.
+# Creation of this reference architecture is fully automated with minimal manual configuration.
 
 ## Prerequisites:
 1.	AWS account with access to your valid:
