@@ -112,7 +112,7 @@ To see the IP/DNS of the core appliances and Elastic LoadBalancer, please see ~/
 ```
 CORE=`cat ~/test_env/Ansible/VMRs.yml | shyaml get-value Instances.0.Instance.PRIVATE_DNS`
 EDGE=`tail -n 1 ~/test_env/Ansible/hosts`
-cd ~/test
+cd ~/test_env
 ```
 
 ## Test svc0 traffic from multiple edge devices into core server
