@@ -1,4 +1,7 @@
 # Testing Solace in AWS
+
+Set up a demo IoT reference architecture in AWS for QoS0 and QoS1 messaging to core applications and QoS0 messaging to edge applications.
+
 ## Overview
 
 This project provides an easy to understand set of steps to bring up a Solace messaging IoT infrastructure in AWS as well as provides a basic set 
