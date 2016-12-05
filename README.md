@@ -9,7 +9,7 @@ of tests to validate the infrastructure and demonstrate Solace messaging functio
 
 ## Documentation
 
-Please read [Documentation](https://SolaceLabs.github.io/Solace_testing_in_AWS/) for complete documentation for description of test infrastructure, 
+Please read [Documentation](https://SolaceLabs.github.io/sl-iot-ref-arch1) for complete documentation for description of test infrastructure, 
 as well as how to install and run tests.
 
 ## Contributing
@@ -18,7 +18,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-See the list of [contributors](https://github.com/SolaceLabs/Solace_testing_in_AWS/contributors) who participated in this project.
+See the list of [contributors](https://github.com/SolaceLabs/sl-iot-ref-arch1/contributors) who participated in this project.
 
 ## License
 
