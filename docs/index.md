@@ -4,7 +4,7 @@ title: Solace Testing in AWS
 ---
 
 ## AIM
-The aim of this project is to enable Solace internal staff to quickly enable and test IoT reference architecture in AWS.
+This project provides a guide to enabling an IoT reference architecture in AWS.
 The IoT reference architecture itself is evolving along with the features/functionality within it.  Therefore this is a phase one of a work in progress that will evolve with reference architecture itself.
 
 ## Applicability
