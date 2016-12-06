@@ -151,7 +151,7 @@ export TOPIC_POSTFIX=/DATADESCRIPTION
 ~/test_env/Tests/sol_direct_IoT_C2E.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
 
-## Test Request message from load balanced edge devices into core appliations. - Device initiated request/reply
+## Test Request message from load balanced edge devices into core applications. - Device initiated request/reply
 
 This traffic pattern shows multiple devices connected across load balanced edge VMRs sending requests to core applications.
 
