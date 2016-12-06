@@ -53,13 +53,13 @@ Get the cloud-init.sh script from here:
 ```
 export AWS_ACCESS_KEY_ID=XXX       # <Your AWS Access key>
 export AWS_SECRET_ACCESS_KEY=XXX   #<Your AWS Key Secret>
-export AWS_KEY_NAME=XXX            #<a TLS PEM you use to access AWS instances>
+export AWS_KEY_NAME=XXX            #<A TLS PEM you use to access AWS instances. Do not include the .pem extension in the name.>
 export AWS_KEY_VALUE=XXX           #<actual content of private key>
 ```
 
 ## Optionally you can edit these variables to modify VMRs and cluster
 
-## VMR perticulars
+## VMR particulars
 
 ```
 export AWS_GROUP_ID=CREATE            #<CREATE will create new policy or provide your security Policy ID>
@@ -68,7 +68,7 @@ export AWS_INSTANCE_NAME="AnsibleVMR" #<What ever name you want to see in AWS co
 export AWS_INSTANCE_AMI=ami-3fa7d528  #Latest released 7.2 Eval
 ```
 
-## Change to define netwoork
+## Change to define network
 
 ```
 export VMR_CORE_CLUSTER=N # <[Y|N] Do you want a fully redundent core, DO NOT SET TO Y>
@@ -86,7 +86,7 @@ export AWS_ELB=N          #   <[Y|N|ELB_NAME]Front VMRs with AWS Elastic_LOAD_BA
 
 ![]({{ site.baseurl }}/images/CreateInstance2.png)
 
-## The Advanced Details section is where you spacify your previously defined init.sh
+## The Advanced Details section is where you specify your previously defined init.sh
 
 ![]({{ site.baseurl }}/images/CreateInstance3.png)
 

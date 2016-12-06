@@ -6,10 +6,10 @@
 # Replace XXX with your credentials, MANDITORY
 export AWS_ACCESS_KEY_ID=XXX     #Your AWS Access key
 export AWS_SECRET_ACCESS_KEY=XXX #Your AWS Key Secret
-export AWS_KEY_NAME=XXX          #a TLS PEM you use to access AWS instances
-export AWS_KEY_VALUE=XXX         #actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY"
+export AWS_KEY_NAME=XXX          #A TLS PEM you use to access AWS instances. Do not include the .pem extension in the name.
+export AWS_KEY_VALUE=XXX         #Actual content of private key, everything between "BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY"
 
-# VMR perticulars
+# VMR particulars
 export AWS_GROUP_ID=CREATE            #CREATE will create new policy or provide your security Policy ID
 export AWS_INSTANCE_TYPE=t2.medium    #t2.medium will be minimum requirement, its not free
 export AWS_INSTANCE_NAME="AnsibleVMR" #What ever name you want to see in AWS console
