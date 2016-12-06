@@ -167,4 +167,4 @@ export REPLY_PREFIX=out/
 export TOPIC_POSTFIX=/svc0/reply/desc
 ~/test_env/Tests/sol_ReqRep_IoT_E2C.sh 20 ${CORE} ${EDGE} solaceDirectIoT10 2> /dev/null
 ```
-## Test Request message from core appliations to load balanced edge devices. - Cloud app initiated request/reply
+## Test Request message from core applications to load balanced edge devices. - Cloud app initiated request/reply
