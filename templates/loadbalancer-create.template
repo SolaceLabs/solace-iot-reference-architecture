@@ -1,0 +1,76 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation sub-template for network interface with elasticIP deployment",
+    "Parameters": {        
+        "securityGroups": {"Type": "List<String>"},
+        "subnetIds":      {"Type": "List<String>"}            
+    },
+    "Mappings":   {    },
+    "Conditions": {    },
+    "Resources":  {
+        "elb": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Properties":{
+                "SecurityGroups": {"Ref":"securityGroups"},
+                "Subnets" :       {"Ref":"subnetIds" },
+                "HealthCheck" : {
+                    "Target" : {
+                        "Fn::Join" : [ "", [ "HTTP:", 5550, "/health-check/guaranteed-active" ] ]
+                    },
+                    "Timeout" : "3",
+                    "Interval" : "5",
+                    "UnhealthyThreshold" : "2",
+                    "HealthyThreshold" : "2"
+                },
+                "Listeners" : [
+                    {
+                    "LoadBalancerPort" : "55555",
+                    "InstancePort" : "55555",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "55003",
+                    "InstancePort" : "55003",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "8000",
+                    "InstancePort" : "8000",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "5672",
+                    "InstancePort" : "5672",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "9000",
+                    "InstancePort" : "9000",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "1883",
+                    "InstancePort" : "1883",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "80",
+                    "InstancePort" : "80",
+                    "Protocol" : "HTTP"
+                    },{
+                    "LoadBalancerPort" : "8080",
+                    "InstancePort" : "8080",
+                    "Protocol" : "HTTP"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "LoadbalancerName": {
+            "Value": {
+                "Ref": "elb"
+            },
+            "Description": "Edge Loadbalancer",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-Loadbalancer"
+                }
+            }
+        }
+    }
+}

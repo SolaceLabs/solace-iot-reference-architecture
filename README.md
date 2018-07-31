@@ -1,35 +1,31 @@
-# Enabling an IoT reference architecture in AWS and Solace
+# Autoscale IoT solution with AWS Cloud Formation, Cloud Watch, and AutoScale Groups
 
-Set up a demo IoT reference architecture in AWS for QoS0 and QoS1 messaging to core applications and QoS0 messaging to edge applications.
+This project exemplifies using AWS autoscale groups in conjunction with Solace PubSub+ software message broker standard edition to build dynamically scallable multiprotocol messaging clusters.
 
-## Overview
+There is a 3 tier architecture.  Starting at the client edge:
+ * A loadbalancer layer that abstracts the complexity of the autoscale group.  Clients have a single connection point.
+ * Scalable edge message brokers layer that handle a dynamic client count and workload.
+ * Consolidated core message broker layer that provides a simple connectivity point for back end applications. 
 
-This project provides a guide to enabling an IoT reference architecture in AWS. The IoT reference architecture itself is evolving along with the features/functionality within it. Therefore this is one phase of a work in progress that will evolve with reference architecture itself.
+![alt text](/images/aws_autoscale.png "autoscale components")
 
-The project provides an easy to understand set of steps to bring up a Solace messaging IoT infrastructure in AWS as well as provides a basic set of tests to validate the infrastructure and demonstrate Solace messaging functionality in AWS.
 
-## Documentation
+You will need to provide the following as inputs, they are not created in these templates:
+ * Solace PubSub+ AMIid, 
+ * existing VPC, 
+ * existing Subnets, and 
+ * existing security groups
 
-Please read [Documentation](https://SolaceLabs.github.io/sl-iot-ref-arch1) for complete documentation for description of test infrastructure, as well as how to install and run tests.
+ There are several ways to obtain a Solace PubSub+ Standard AMI reference.  A simple method is to view it in the AWS Marketplace.
+Once logged into AWS folow the following link, select correct region and note AMI:
+https://aws.amazon.com/marketplace/server/configuration?productId=33e0d3e8-860c-4411-89bd-afce4dc59c64&ref_=psb_cfg_continue
 
-## Contributing
+![alt text](/images/obtain_ami.png "solace in marketplace")
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+Click below to launch in AWS Cloud Formation:   
 
-## Authors
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=AutoScale&templateURL=https://s3.amazonaws.com/kbarr/solace-aws-iot-autoscale/latest/templates/solace-iot.template" target="_blank">
+    <img src="/images/launch-button-existing.png"/>
+</a>
 
-See the list of [contributors](https://github.com/SolaceLabs/sl-iot-ref-arch1/contributors) who participated in this project.
 
-## License
-
-This project is licensed under the Apache License, Version 2.0. - See the [LICENSE](LICENSE) file for details.
-
-## Resources
-
-For more information try these resources:
-
-- Learn more at the Solace Developer Portal website at: http://dev.solace.com
-- Get a better understanding of [Solace technology](http://dev.solace.com/tech/).
-- Check out the [Solace blogs](http://dev.solace.com/blog/) for other interesting discussions around Solace technology
-- Find out more about [Solace in IoT] (https://solace.com/internet-of-things)
-- Ask the [Solace community](http://dev.solace.com/community/)

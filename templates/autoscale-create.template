@@ -1,0 +1,418 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+"Description": "CloudFormation sub-template for Auto-scaling group deployment",
+"Parameters": {
+    "Role": {
+        "AllowedValues": [
+            "core",
+            "edge"
+        ],
+        "Type": "String"},
+    
+    "InstanceProfile":      {"Type": "String"},
+    "SolaceAMI":            {"Type": "String"},
+    "AdminPassword":        {"Type": "String"},
+    "BootDiskSize":         {"Type": "Number"},
+    "KeyPairName":          {"Type": "AWS::EC2::KeyPair::KeyName"},
+    "SolaceLogFormat":      {"Type": "String"},
+    "NodeInstanceType":     {"Type": "String"},
+    "NodeSecurityGroup":    {"Type": "List<String>"},
+    "MinNodesNumber":       {"Type": "Number"},
+    "MaxNodesNumber":       {"Type": "Number"},
+    "PersistentStorage":    {"Type": "Number"},
+    "QSS3BucketName":       {"Type": "String"},
+    "QSS3KeyPrefix":        {"Type": "String"},
+    "SubnetIDs":            {"Type": "List<String>"},
+    "CoreIP":               {"Type": "String"},
+    "CoreInterface":        {"Type": "String"},
+    "LoadBalancerName":     {"Type": "String"}
+},
+"Mappings": {},
+"Conditions": {
+    "GovCloudCondition": {
+        "Fn::Equals": [
+            {
+                "Ref": "AWS::Region"
+            },
+            "us-gov-west-1"
+        ]
+    },
+    "CoreRole": {
+        "Fn::Equals": [
+            {"Ref": "Role"},
+            "core"
+        ]
+    },
+    "EdgeRole": {
+        "Fn::Equals": [
+            {"Ref": "Role"},
+            "edge"
+        ]
+    }
+},
+"Resources": {
+    "CloudFormationLogs": {
+        "Type": "AWS::Logs::LogGroup",
+        "Condition": "EdgeRole",
+        "Properties": {
+            "RetentionInDays": 7
+        }
+    },
+    "ConnectionMetric": {
+        "Type": "AWS::Logs::MetricFilter",
+        "Condition": "EdgeRole",
+        "Properties": {
+            "LogGroupName": { "Ref": "CloudFormationLogs" },
+            "FilterPattern": "{ $.count = * }",
+            "MetricTransformations": [
+                { 
+                    
+                    "MetricName":      {"Fn::Join": ["-",[{ "Ref": "AWS::StackName" }, "connectionCount"]]},
+                    "MetricNamespace":  "LogMetrics",
+                    "MetricValue":     "$.count" 
+                }
+            ]
+        }
+    },
+    "Nodes": {
+        "Type": "AWS::AutoScaling::AutoScalingGroup",
+        "Properties": {
+            "Fn::If": [
+                "CoreRole",
+                {
+                    "VPCZoneIdentifier":        {"Ref": "SubnetIDs"},
+                    "LaunchConfigurationName":  {"Ref": "NodeLaunchConfig"},
+                    "MinSize":                  {"Ref": "MinNodesNumber"},
+                    "MaxSize":                  {"Ref": "MaxNodesNumber"},
+                    "DesiredCapacity":          {"Ref": "MinNodesNumber"}
+                },
+                {
+                    "VPCZoneIdentifier":        {"Ref": "SubnetIDs"},
+                    "LaunchConfigurationName":  {"Ref": "NodeLaunchConfig"},
+                    "MinSize":                  {"Ref": "MinNodesNumber"},
+                    "MaxSize":                  {"Ref": "MaxNodesNumber"},
+                    "DesiredCapacity":          {"Ref": "MinNodesNumber"},
+                    "LoadBalancerNames" :       [ { "Ref" : "LoadBalancerName" } ]
+                }
+            ]
+        }
+    },
+    "ConnectionScalingPolicy" : {
+        "Type" : "AWS::AutoScaling::ScalingPolicy",
+        "Condition": "EdgeRole",
+        "Properties" : {
+          "AdjustmentType" : "ChangeInCapacity",
+          "PolicyType" : "SimpleScaling",	
+          "Cooldown" : "60",
+          "AutoScalingGroupName" : { "Ref" : "Nodes" },
+          "ScalingAdjustment" : 1
+        }
+    },
+    "ConnectionHighAlarm": {
+        "Type": "AWS::CloudWatch::Alarm",
+        "Condition": "EdgeRole",
+        "Properties": {
+           "EvaluationPeriods": "1",
+           "Statistic": "Average",
+           "Threshold": "10",
+           "AlarmDescription": "Alarm if connection count goes too high",
+           "Period": "60",
+           "AlarmActions": [ { "Ref": "ConnectionScalingPolicy" } ],
+           "Namespace": "LogMetrics",
+           "ComparisonOperator": "GreaterThanThreshold",
+           "MetricName": {"Fn::Join": ["-",[{ "Ref": "AWS::StackName" }, "connectionCount"]]}
+        }
+     },
+    "NodeLaunchConfig": {
+        "Type": "AWS::AutoScaling::LaunchConfiguration",
+        "Metadata": {
+            "AWS::CloudFormation::Init": {
+                "configSets" : {
+                    "install_all" : [ "install_awscli", "install_solace", "install_logs" ]
+                },
+                "install_awscli": {
+                    "packages" : {
+                        "python" : {
+                            "awscli" : []
+                        }
+                    }
+                },
+                "install_solace" : {
+                    "commands" : {
+                        "01_create_secrets_directory" : {
+                            "command" : "mkdir -p /mnt/vmr/secrets"
+                        }
+                    },
+                    "files": {
+                        "Fn::If": [
+                            "CoreRole",
+                            {
+                                "/mnt/vmr/secrets/solOSpasswd": {
+                                    "content": { "Ref" : "AdminPassword" }
+                                },
+                                "/tmp/core-interface-activation.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/core-interface-activation.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },
+                                "/tmp/sempv1_config_command.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/sempv1_config_command.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                }
+                            },
+                            {
+                                "/mnt/vmr/secrets/solOSpasswd": {
+                                    "content": { "Ref" : "AdminPassword" }
+                                },
+                                "/tmp/core-bridge-configure.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/core-bridge-configure.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },                                                                 
+                                "/tmp/core-queue-configure.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/core-queue-configure.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                }, 
+                                "/tmp/edge-bridge-configure.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/edge-bridge-configure.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },                                                                 
+                                "/tmp/edge-queue-configure.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/edge-queue-configure.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },
+                                "/tmp/edge-bridging-activation.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/edge-bridging-activation.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },
+                                "/tmp/connection_count.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/connection_count.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },
+                                "/tmp/cron_setup.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/cron_setup.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                },
+                                "/tmp/sempv2_config_command.sh": {
+                                    "source": {
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/sempv2_config_command.sh",
+                                            {"QSS3Region": {"Fn::If": ["GovCloudCondition","s3-us-gov-west-1","s3"]}}
+                                        ]
+                                    },
+                                    "mode": "000755",
+                                    "owner": "root",
+                                    "group": "root"
+                                }
+                            }
+                        ]               
+                    }
+                },
+                "install_logs": {
+                    "Fn::If": [
+                        "CoreRole",
+                        {"files": {}},
+                        {
+                        "files": {
+                        "/etc/awslogs/awslogs.conf": {
+                            "content": { "Fn::Join": [ "", [
+                            "[general]\n",
+                            "state_file= /var/awslogs/state/agent-state\n",
+
+                            "[/var/log/connection_count.log]\n",
+                            "file = /var/log/connection_count.log\n",
+                            "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                            "log_stream_name = connection_count\n",
+                            "datetime_format = \n"
+                            ] ] },
+                            "mode": "000444",
+                            "owner": "root",
+                            "group": "root"
+                        },
+                        "/etc/awslogs/awscli.conf": {
+                            "content": { "Fn::Join": [ "", [
+                            "[plugins]\n",
+                            "cwlogs = cwlogs\n",
+                            "[default]\n",
+                            "region = ", { "Ref" : "AWS::Region" }, "\n"
+                            ] ] },
+                            "mode": "000444",
+                            "owner": "root",
+                            "group": "root"
+                        }
+                        },
+                        "commands" : {
+                        "01_create_state_directory" : {
+                            "command" : "mkdir -p /var/awslogs/state"
+                        }
+                        },
+                        "services" : {
+                            "sysvinit" : {
+                                "awslogs"    : { "enabled" : "true", "ensureRunning" : "true",
+                                                "files" : [ "/etc/awslogs/awslogs.conf" ] }
+                            }
+                        }
+                        }
+                    ]
+                }
+            }
+        },
+        "Properties": {
+            "ImageId":              {"Ref": "SolaceAMI"},
+            "SecurityGroups":       {"Ref": "NodeSecurityGroup"},
+            "InstanceType":         {"Ref": "NodeInstanceType"},
+            "KeyName":              {"Ref": "KeyPairName"},
+            "IamInstanceProfile":   {"Ref": "InstanceProfile"},
+            "UserData": {
+                "Fn::Base64": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "Content-Type: multipart/mixed; boundary=\"==BOUNDRY==\"\n",
+                            "MIME-Version: 1.0\n",
+                            "\n",
+                            "--==BOUNDRY==\n",
+                            "Content-Type: text/cloud-config; charset=\"us-ascii\"\n",
+                            "MIME-Version: 1.0\n",
+                            "Content-Transfer-Encoding: 7bit\n",
+                            "Content-Disposition: attachment; filename=\"cloud.cfg\"\n",
+                            "\n",
+                            "#cloud-config\n",
+                            "solace:\n",
+                            "    configuration_keys:\n",
+                            "        username_admin_globalaccesslevel: admin\n",
+                            "        username_admin_password: ", {"Ref": "AdminPassword"} ,"\n",
+                            "\n",
+                            "--==BOUNDRY==\n",
+                            "Content-Type: text/x-shellscript; charset=\"us-ascii\"\n",
+                            "MIME-Version: 1.0\n",
+                            "Content-Transfer-Encoding: 7bit\n",
+                            "Content-Disposition: attachment; filename=\"script.sh\"\n",
+                            "\n",
+                            "#!/bin/bash -xe\n",
+                            "cd /root\n",
+                            "echo \"`date` INFO:Install aws-cfn-bootstrap\"\n",
+                            "curl -o aws-cfn-bootstrap-latest.tar.gz https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                            "easy_install aws-cfn-bootstrap-latest.tar.gz\n",
+                            "echo \"`date` INFO:Install awscli\"\n",  
+                            "easy_install pip\n", 
+                            "pip install pystache\n", 
+                            "pip install argparse \n",
+                            "pip install python-daemon\n",
+                            "pip install requests\n", 
+                            "pip install awscli\n", 
+                            "if [ \"", {"Ref": "Role"},"\" != \"core\" ]; then \n",
+                                "echo \"`date` INFO:Install awslogs-agent-setup\"\n",
+                                "curl -o awslogs-agent-setup.py https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py\n",
+                                "touch /tmp/blankfile.cfg\n",
+                                "python ./awslogs-agent-setup.py --region=us-east-1 --non-interactive  --configfile=/tmp/blankfile.cfg\n",
+                            "fi\n",
+                            "echo \"`date` INFO:Run cloud formation init\"\n",
+                            "cfn-init",
+                            "  --resource  NodeLaunchConfig",
+                            "  --configsets install_all",
+                            "  --stack ",  { "Ref": "AWS::StackName" },
+                            "  --region ", { "Ref" : "AWS::Region" }, "\n",
+                            "instance_id=$(curl -f http://instance-data/latest/meta-data/instance-id)\n",
+                            "aws ec2 create-tags",
+                            " --region ", { "Ref" : "AWS::Region" },
+                            " --resources $instance_id",
+                            " --tags Key=Name,Value=",{ "Ref": "AWS::StackName" },"\n",
+                            "\n",                             
+                            "echo \"`date` INFO:Signal Node up\"\n",
+                            "#cfn-signal -e 0 ",
+                            "#  --resource  Nodes",
+                            "#  --stack ",  { "Ref": "AWS::StackName" },
+                            "#  --region ", { "Ref" : "AWS::Region" }, "\n",
+                            "\n",
+                            "if [ \"", {"Ref": "Role"},"\" = \"core\" ]; then \n",
+                                "echo \"`date` INFO:Attache static interface\"\n",
+                                "aws ec2 attach-network-interface --region ", { "Ref" : "AWS::Region" },
+                                " --network-interface-id ", { "Ref" : "CoreInterface" },
+                                " --instance-id ${instance_id} --device-index 1\n",
+                                "echo \"BOOTPROTO=dhcp\n",
+                                "DEVICE=eth1\n",
+                                "ONBOOT=yes\n",
+                                "TYPE=Ethernet\n",
+                                "USERCTL=no\" > /etc/sysconfig/network-scripts/ifcfg-eth1\n",
+                                "nohup /tmp/core-interface-activation.sh -u admin -d localhost",
+                                " -p ",{ "Ref" : "AdminPassword" }, " &\n",
+                            "else\n",
+                                "/tmp/edge-bridging-activation.sh",
+                                " -u admin",
+                                " -d ", { "Ref" : "CoreIP" },
+                                " -p ",{ "Ref" : "AdminPassword" },"  &\n",
+                                "python /root/awslogs-agent-setup.py --region=us-east-1 --non-interactive  --configfile=/etc/awslogs/awslogs.conf\n",
+                                "/tmp/cron_setup.sh\n",
+                            "fi\n",
+                            "\n",
+                            "--==BOUNDRY==\n"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}
+}

@@ -1,0 +1,65 @@
+
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation sub-template for network interface with elasticIP deployment",
+    "Parameters": {        
+        "securityGroup": {
+            "Description": "String representation of the security group",
+            "Type": "List<String>"     
+        },
+        "subnetId": {
+            "Description": "String representation of the subnet id",
+            "Type":  "AWS::EC2::Subnet::Id"            
+        }
+    },
+    "Mappings":   {    },
+    "Conditions": {    },
+    "Resources":  {
+        "elasticIP": {
+            "Type" : "AWS::EC2::EIP",
+            "Properties" : {
+                "Domain" : "vpc"
+            }
+        },
+        "networkInterface": {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "Description" : "Static interface for core router",
+                "GroupSet"         : { "Ref" : "securityGroup" },
+                "SubnetId"         : { "Ref" : "subnetId" }
+            }
+        },
+        "associateIP" : {
+            "DependsOn": ["networkInterface", "elasticIP"],             
+            "Type" : "AWS::EC2::EIPAssociation",
+            "Properties" : {
+                "AllocationId" : { "Fn::GetAtt" : [ "elasticIP", "AllocationId" ]},
+                "NetworkInterfaceId" : { "Ref" : "networkInterface" }
+            }
+        }
+    },
+    "Outputs": {
+        "CoreIP": {
+            "Value": {
+                "Ref": "elasticIP"
+            },
+            "Description": "Core Elastic IP",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-CoreIP"
+                }
+            }
+        },
+        "CoreInterface": {
+            "Value": {
+                "Ref": "networkInterface"
+            },
+            "Description": "Core Network Interface",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-CoreInterface"
+                }
+            }
+        }
+    }
+}
