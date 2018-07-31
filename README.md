@@ -24,7 +24,7 @@ https://aws.amazon.com/marketplace/server/configuration?productId=33e0d3e8-860c-
 
 Click below to launch in AWS Cloud Formation:   
 
-<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=AutoScale&templateURL=https://s3.amazonaws.com/kbarr/solace-aws-iot-autoscale/latest/templates/solace-iot.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=AutoScale&templateURL=https://s3.amazonaws.com/solace-aws-iot-reference-architecture/latest/templates/solace-iot.template" target="_blank">
     <img src="/images/launch-button-existing.png"/>
 </a>
 
