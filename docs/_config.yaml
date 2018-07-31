@@ -1,0 +1,4 @@
+# Site settings
+title: solace-iot-reference-architecture
+baseurl: "/solace-iot-reference-architecture" 
+repository: https://github.com/SolaceLabs/solace-iot-reference-architecture
