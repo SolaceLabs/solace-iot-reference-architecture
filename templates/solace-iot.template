@@ -86,10 +86,10 @@
                     "default": "Maximum number of Core Router"
                 },
                 "MinimumEdgeRouters": {
-                    "default": "Starting number of Core Router"
+                    "default": "Starting number of Edge Router"
                 },
                 "MaximumEdgeRouters": {
-                    "default": "Maximum number of Core Router"
+                    "default": "Maximum number of Edge Router"
                 },
                 "PublicSubnetIds": {
                     "default": "Public Subnet IDs"
