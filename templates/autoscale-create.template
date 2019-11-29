@@ -302,7 +302,7 @@
                         },
                         "services" : {
                             "sysvinit" : {
-                                "awslogs"    : { "enabled" : "true", "ensureRunning" : "true",
+                                "awslogsd"    : { "enabled" : "true", "ensureRunning" : "true",
                                                 "files" : [ "/etc/awslogs/awslogs.conf" ] }
                             }
                         }
