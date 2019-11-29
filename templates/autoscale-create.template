@@ -128,14 +128,7 @@
         "Metadata": {
             "AWS::CloudFormation::Init": {
                 "configSets" : {
-                    "install_all" : [ "install_awscli", "install_solace", "install_logs" ]
-                },
-                "install_awscli": {
-                    "packages" : {
-                        "python" : {
-                            "awscli" : []
-                        }
-                    }
+                    "install_all" : [ "install_solace", "install_logs" ]
                 },
                 "install_solace" : {
                     "commands" : {
@@ -352,24 +345,8 @@
                             "\n",
                             "#!/bin/bash -xe\n",
                             "cd /root\n",
-                            "echo \"`date` INFO:Install aws-cfn-bootstrap\"\n",
-                            "curl -o aws-cfn-bootstrap-latest.tar.gz https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-                            "easy_install aws-cfn-bootstrap-latest.tar.gz\n",
-                            "echo \"`date` INFO:Install awscli\"\n",  
-                            "easy_install pip\n", 
-                            "pip install pystache\n", 
-                            "pip install argparse \n",
-                            "pip install python-daemon\n",
-                            "pip install requests\n", 
-                            "pip install awscli\n", 
-                            "if [ \"", {"Ref": "Role"},"\" != \"core\" ]; then \n",
-                                "echo \"`date` INFO:Install awslogs-agent-setup\"\n",
-                                "curl -o awslogs-agent-setup.py https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py\n",
-                                "touch /tmp/blankfile.cfg\n",
-                                "python ./awslogs-agent-setup.py --region=us-east-1 --non-interactive  --configfile=/tmp/blankfile.cfg\n",
-                            "fi\n",
                             "echo \"`date` INFO:Run cloud formation init\"\n",
-                            "cfn-init",
+                            "/opt/aws/bin/cfn-init",
                             "  --resource  NodeLaunchConfig",
                             "  --configsets install_all",
                             "  --stack ",  { "Ref": "AWS::StackName" },
@@ -381,7 +358,7 @@
                             " --tags Key=Name,Value=",{ "Ref": "AWS::StackName" },"\n",
                             "\n",                             
                             "echo \"`date` INFO:Signal Node up\"\n",
-                            "#cfn-signal -e 0 ",
+                            "#/opt/aws/bin/cfn-signal -e 0 ",
                             "#  --resource  Nodes",
                             "#  --stack ",  { "Ref": "AWS::StackName" },
                             "#  --region ", { "Ref" : "AWS::Region" }, "\n",
@@ -403,7 +380,6 @@
                                 " -u admin",
                                 " -d ", { "Ref" : "CoreIP" },
                                 " -p ",{ "Ref" : "AdminPassword" },"  &\n",
-                                "python /root/awslogs-agent-setup.py --region=us-east-1 --non-interactive  --configfile=/etc/awslogs/awslogs.conf\n",
                                 "/tmp/cron_setup.sh\n",
                             "fi\n",
                             "\n",
