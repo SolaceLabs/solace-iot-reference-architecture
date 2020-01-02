@@ -31,7 +31,7 @@ while [ $count -lt $retries  ]; do
     query_response_code=""
     query_response=`curl -H "${header}" -X ${method} -u ${name}:${password} ${url} -d "${data}"`
     query_response_code=`echo $query_response | grep -oE "\"responseCode\":[0-9]+" | grep -oE "[0-9]+"`
-    if [ ${query_response_code} != "200" ]; then
+    if [[ -z ${query_response_code} && ${query_response_code} != "200" ]]; then
         ((count++))
         echo "`date` WARN:${script_name}: SEMPv2 command attempt ${count} of ${retries} failed -${query_response}-" >&2
         sleep ${wait}
